@@ -1,0 +1,198 @@
+<Window x:Class="PharmacyClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Аптечная Система" 
+        Height="700" 
+        Width="1000"
+        WindowState="Maximized">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" x:Name="MainMenu">
+            <MenuItem Header="_Файл">
+                <MenuItem Header="Выйти" Click="ExitButton_Click"/>
+            </MenuItem>
+            
+            <!-- Справочники - Basic access for all roles -->
+            <MenuItem Header="_Справочники">
+                <MenuItem Header="Категории лекарств" Tag="All"/>
+                <MenuItem Header="Типы лекарств" Tag="All"/>
+                <MenuItem Header="Единицы измерения" Tag="All"/>
+            </MenuItem>
+            
+            <!-- Лекарства - Pharmacist and above -->
+            <MenuItem Header="_Лекарства">
+                <MenuItem Header="Реестр лекарств" Tag="Pharmacist,Manager,Administrator"/>
+                <MenuItem Header="Производство" Tag="LabAssistant,Manager,Administrator"/>
+                <MenuItem Header="Технологии приготовления" Tag="LabAssistant,Manager,Administrator"/>
+                <MenuItem Header="Состав лекарств" Tag="LabAssistant,Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Компоненты - Lab Assistant and above -->
+            <MenuItem Header="_Компоненты">
+                <MenuItem Header="Реестр компонентов" Tag="LabAssistant,Manager,Administrator"/>
+                <MenuItem Header="Заявки на компоненты" Tag="LabAssistant,Manager,Administrator"/>
+                <MenuItem Header="Движение компонентов" Tag="LabAssistant,Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Рецепты - Pharmacist and above -->
+            <MenuItem Header="_Рецепты">
+                <MenuItem Header="Рецепты врачей" Tag="Pharmacist,Manager,Administrator"/>
+                <MenuItem Header="Пациенты" Tag="Pharmacist,Manager,Administrator"/>
+                <MenuItem Header="Врачи" Tag="Pharmacist,Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Склад и инвентаризация - Manager and above -->
+            <MenuItem Header="_Склад">
+                <MenuItem Header="Движение товаров" Tag="Manager,Administrator"/>
+                <MenuItem Header="Инвентаризация" Tag="Manager,Administrator"/>
+                <MenuItem Header="Результаты инвентаризации" Tag="Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Заказы - Manager and above -->
+            <MenuItem Header="_Заказы">
+                <MenuItem Header="Заказы на производство" Tag="Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Сотрудники - Administrator only -->
+            <MenuItem Header="_Сотрудники" Tag="Administrator">
+                <MenuItem Header="Все сотрудники" Tag="Administrator"/>
+            </MenuItem>
+            
+            <!-- Администрирование - Administrator only -->
+            <MenuItem Header="_Администрирование" Tag="Administrator">
+                <MenuItem Header="Настройки системы" Tag="Administrator"/>
+                <MenuItem Header="Журнал действий" Tag="Administrator"/>
+            </MenuItem>
+        </Menu>
+        
+        <!-- User Info Panel -->
+        <StackPanel Grid.Row="0" 
+                    HorizontalAlignment="Right" 
+                    Orientation="Horizontal" 
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center">
+            <TextBlock x:Name="UserInfoText" 
+                       Text="" 
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       Margin="0,0,10,0"/>
+            <Button Content="Выход" 
+                    Click="LogoutButton_Click"
+                    Padding="10,5"/>
+        </StackPanel>
+        
+        <!-- Main Content Area -->
+        <TabControl Grid.Row="1" Margin="10">
+            <!-- Dashboard Tab - Visible to all -->
+            <TabItem Header="Главная">
+                <Grid Margin="10">
+                    <StackPanel>
+                        <TextBlock Text="Добро пожаловать в Аптечную Систему!" 
+                                   FontSize="20" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10"/>
+                        
+                        <Border BorderBrush="#CCCCCC" 
+                                BorderThickness="1" 
+                                CornerRadius="5"
+                                Padding="15"
+                                Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="Информация о пользователе:" 
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Margin="0,0,0,10"/>
+                                <TextBlock x:Name="UserNameText" 
+                                           FontSize="14"
+                                           Margin="0,3"/>
+                                <TextBlock x:Name="UserPositionText" 
+                                           FontSize="14"
+                                           Margin="0,3"/>
+                                <TextBlock x:Name="UserDepartmentText" 
+                                           FontSize="14"
+                                           Margin="0,3"/>
+                                <Separator Margin="0,10"/>
+                                <TextBlock x:Name="UserRoleText" 
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Margin="0,3"/>
+                                <TextBlock x:Name="UserPermissionsText" 
+                                           FontSize="14"
+                                           Margin="0,3"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <TextBlock Text="Ваши права доступа:" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Margin="0,10,0,10"/>
+                        
+                        <WrapPanel x:Name="AccessRightsPanel">
+                            <!-- Will be populated based on role -->
+                        </WrapPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <!-- Additional tabs will be shown/hidden based on role -->
+            <TabItem Header="Лекарства" x:Name="MedicinesTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления лекарствами" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Компоненты" x:Name="ComponentsTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления компонентами" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Рецепты" x:Name="PrescriptionsTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления рецептами" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Склад" x:Name="WarehouseTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления складом" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Заказы" x:Name="OrdersTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления заказами" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Сотрудники" x:Name="EmployeesTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел управления сотрудниками" FontSize="16"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Администрирование" x:Name="AdminTab">
+                <Grid Margin="10">
+                    <TextBlock Text="Раздел администрирования системы" FontSize="16"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusText" Text="Готов к работе"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="ConnectionStatusText" Text="Подключено к БД"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
