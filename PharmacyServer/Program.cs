@@ -7,6 +7,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Добавляем DbContext
+builder.Services.AddDbContext<PharmacyServer.Models.PharmacyDbContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
