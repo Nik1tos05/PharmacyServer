@@ -11,7 +11,7 @@ namespace PharmacyClient.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
+        private readonly PharmacyClient.Data.PharmacyDbContext _context;
 
         [ObservableProperty]
         private string _lastName = string.Empty;
@@ -33,7 +33,7 @@ namespace PharmacyClient.ViewModels
 
         public LoginViewModel()
         {
-            _context = new PharmacyDbContext();
+            _context = new PharmacyClient.Data.PharmacyDbContext();
         }
 
         [RelayCommand]
