@@ -3,7 +3,7 @@ using PharmacyServer.Models;
 
 namespace PharmacyClient.Data
 {
-    public class PharmacyDbContext : DbContext
+    public partial class PharmacyDbContext : DbContext
     {
         public PharmacyDbContext()
         {
@@ -45,6 +45,10 @@ namespace PharmacyClient.Data
             OnModelCreatingPartial(modelBuilder);
         }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
+        {
+            // This partial method can be implemented in another partial class file
+            // to add custom model configuration if needed
+        }
     }
 }

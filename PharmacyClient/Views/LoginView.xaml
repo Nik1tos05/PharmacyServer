@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:PharmacyClient.ViewModels"
+        xmlns:converters="clr-namespace:PharmacyClient.Converters"
         mc:Ignorable="d"
         Title="Вход в систему - Аптека" 
         Height="500" 
@@ -19,6 +20,12 @@
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="5"/>
         </Style>
+        
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
+        <converters:BoolToYesNoConverter x:Key="BoolToYesNoConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     
     <Grid Margin="20">
@@ -54,7 +61,6 @@
                 <TextBlock Text="Сотрудник:" FontWeight="Bold"/>
                 <ComboBox ItemsSource="{Binding Employees}"
                           SelectedItem="{Binding SelectedEmployee}"
-                          DisplayMemberPath="LastName"
                           Height="30"
                           Margin="5">
                     <ComboBox.ItemTemplate>
