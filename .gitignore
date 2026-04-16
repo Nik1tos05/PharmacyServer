@@ -1,50 +1,29 @@
 ```
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-build/
-bld/
-[Bb]in/
-[Oo]bj/
-
-# Visual Studio files
-*.sln.docstates
-*.user
-*.userosscache
-*.suo
-*.csproj.user
-*.vbproj.user
-*.vcxproj.user
-*.sln.cache
-
-# Visual Studio Code files
-.vscode/
-
-# NuGet Packages
+# Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
 *.nupkg
+*.log
+
+# Dependencies
 packages/
-
-# Output of 'dotnet publish'
-**/bin/Release/**
-**/bin/Debug/**
-
-# Configuration files
-appsettings.Development.json
-appsettings.Production.json
+node_modules/
 
 # User-specific files
 .vs/
-*.userprefs
-
-# Log files
-*.log
+*.user
+*.userosscache
+*.suo
 
 # Environment specific settings
 .env
 .env.local
-*.env.*
+*.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
