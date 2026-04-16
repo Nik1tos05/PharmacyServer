@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
 
 namespace PharmacyClient
@@ -114,7 +115,7 @@ namespace PharmacyClient
                     BorderBrush = System.Windows.Media.Brushes.LightGray,
                     BorderThickness = new Thickness(1),
                     CornerRadius = new CornerRadius(5),
-                    Padding = new Thickness(10, 5),
+                    Padding = new Thickness(10, 5, 10, 5),
                     Margin = new Thickness(5),
                     Child = new TextBlock
                     {
