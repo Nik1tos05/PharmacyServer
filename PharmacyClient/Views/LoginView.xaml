@@ -97,6 +97,7 @@
                             <Setter Property="Margin" Value="0,3"/>
                         </Style>
                     </StackPanel.Resources>
+                    
                     <TextBlock Text="Информация о сотруднике:" FontWeight="Bold" Margin="0,0,0,10"/>
                     <TextBlock Text="{Binding SelectedEmployee.LastName, StringFormat='Фамилия: {0}'}"/>
                     <TextBlock Text="{Binding SelectedEmployee.FirstName, StringFormat='Имя: {0}'}"/>
