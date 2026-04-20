@@ -2,23 +2,35 @@
 # Build artifacts
 bin/
 obj/
-*.exe
 *.dll
+*.exe
 *.pdb
-*.userprefs
+*.nupkg
 
 # Dependencies
 packages/
+node_modules/
 
 # Logs
 *.log
 
-# OS generated files
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Visual Studio
-*.user
-*.suo
-.vs/
+# Test and coverage
+TestResults/
+coverage/
+*.coverage
 ```

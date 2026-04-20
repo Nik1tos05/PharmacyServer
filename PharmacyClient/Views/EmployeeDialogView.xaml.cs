@@ -29,7 +29,7 @@ namespace PharmacyClient.Views
 
     public partial class EmployeeDialogViewModel : ObservableValidator, IDisposable
     {
-        private readonly PharmacyDbContext _context;
+        private readonly PharmacyClient.Data.PharmacyDbContext _context;
         private readonly SqlServerUserManagementService _userService;
         private readonly Employee? _originalEmployee;
         
@@ -88,7 +88,7 @@ namespace PharmacyClient.Views
 
         public EmployeeDialogViewModel(Employee? employee = null, ObservableCollection<string>? departments = null)
         {
-            _context = new PharmacyDbContext();
+            _context = new PharmacyClient.Data.PharmacyDbContext();
             var connectionString = _context.Database.GetConnectionString();
             _userService = new SqlServerUserManagementService(connectionString!);
 
