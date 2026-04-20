@@ -6,31 +6,19 @@ obj/
 *.dll
 *.pdb
 *.userprefs
-*.cache
-*.compiled
-*.nupkg
-*.snupkg
 
 # Dependencies
 packages/
-node_modules/
-vendor/
 
 # Logs
 *.log
 
-# Environment
-.env
-.env.local
-.env.*
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Visual Studio
+*.user
+*.suo
+.vs/
 ```
