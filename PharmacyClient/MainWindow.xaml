@@ -1,6 +1,7 @@
 <Window x:Class="PharmacyClient.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PharmacyClient.Views"
         Title="Аптечная Система" 
         Height="700" 
         Width="1000"
@@ -173,15 +174,11 @@
             </TabItem>
             
             <TabItem Header="Сотрудники" x:Name="EmployeesTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел управления сотрудниками" FontSize="16"/>
-                </Grid>
+                <local:EmployeesView/>
             </TabItem>
             
             <TabItem Header="Администрирование" x:Name="AdminTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел администрирования системы" FontSize="16"/>
-                </Grid>
+                <local:AdministrationView/>
             </TabItem>
         </TabControl>
         
