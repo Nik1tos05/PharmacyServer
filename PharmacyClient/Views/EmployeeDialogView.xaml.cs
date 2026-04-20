@@ -170,7 +170,10 @@ namespace PharmacyClient.Views
                 
                 if (HasErrors)
                 {
-                    var errors = GetErrors().SelectMany(e => e.MemberNames).Select(m => GetErrors(m)).SelectMany(vr => vr.ErrorMessage).Where(e => !string.IsNullOrEmpty(e)).ToList();
+                    var errors = GetErrors()
+                        .SelectMany(vr => vr.MemberNames.SelectMany(mn => GetErrors(mn).SelectMany(v => v.ErrorMessage)))
+                        .Where(e => !string.IsNullOrEmpty(e))
+                        .ToList();
                     if (errors.Any())
                     {
                         MessageBox.Show($"Пожалуйста, исправьте ошибки:\n{string.Join("\n", errors)}", 
