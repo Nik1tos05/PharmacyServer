@@ -1,30 +1,18 @@
 ```
-# Build artifacts
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
+# Environment
+.env
+.env.local
+*.env.*
 
-# Dependencies
-packages/
-bin/
-obj/
-
-# Logs
+# Logs and temp files
 *.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Temporary files
 *.tmp
-*.temp
+*.swp
 
-# User-specific files
-.vs/
+# Editors
+.vscode/
 .idea/
+
+# Original rules preserved
+*.log
 ```
