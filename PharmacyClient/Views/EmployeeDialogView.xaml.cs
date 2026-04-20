@@ -89,8 +89,9 @@ namespace PharmacyClient.Views
         public EmployeeDialogViewModel(Employee? employee = null, ObservableCollection<string>? departments = null)
         {
             _context = new PharmacyClient.Data.PharmacyDbContext();
-            var connectionString = _context.Database.GetConnectionString();
-            _userService = new SqlServerUserManagementService(connectionString!);
+            var connectionString = App.CurrentUserSession?.ConnectionString ?? 
+                                   "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
+            _userService = new SqlServerUserManagementService(connectionString);
 
             if (departments != null)
             {
@@ -169,7 +170,7 @@ namespace PharmacyClient.Views
                 
                 if (HasErrors)
                 {
-                    var errors = GetErrors().Where(e => !string.IsNullOrEmpty(e)).ToList();
+                    var errors = GetErrors().SelectMany(e => e.Errors).Select(err => err.ErrorMessage).Where(e => !string.IsNullOrEmpty(e)).ToList();
                     if (errors.Any())
                     {
                         MessageBox.Show($"Пожалуйста, исправьте ошибки:\n{string.Join("\n", errors)}", 

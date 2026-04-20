@@ -43,8 +43,9 @@ namespace PharmacyClient.ViewModels
             Departments.Add("Все");
             
             // Инициализируем сервис управления пользователями
-            var connectionString = _context.Database.GetConnectionString();
-            _userService = new SqlServerUserManagementService(connectionString!);
+            var connectionString = App.CurrentUserSession?.ConnectionString ?? 
+                                   "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
+            _userService = new SqlServerUserManagementService(connectionString);
         }
 
         [RelayCommand]
