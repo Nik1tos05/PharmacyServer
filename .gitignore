@@ -2,15 +2,19 @@
 # Build artifacts
 bin/
 obj/
-*.dll
 *.exe
+*.dll
 *.pdb
 *.userprefs
+*.cache
+*.compiled
+*.nupkg
+*.snupkg
 
 # Dependencies
 packages/
 node_modules/
-.nuget/
+vendor/
 
 # Logs
 *.log
@@ -18,7 +22,7 @@ node_modules/
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -26,11 +30,7 @@ node_modules/
 *.swp
 *.swo
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
-
-# Test and coverage
-TestResults/
-coverage/
 ```
