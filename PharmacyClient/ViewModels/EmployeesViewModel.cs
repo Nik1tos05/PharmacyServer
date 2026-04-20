@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
+using PharmacyClient.Services;
 using PharmacyServer.Models;
 
 namespace PharmacyClient.ViewModels
@@ -11,6 +12,7 @@ namespace PharmacyClient.ViewModels
     public partial class EmployeesViewModel : ObservableObject
     {
         private readonly PharmacyClient.Data.PharmacyDbContext _context;
+        private readonly SqlServerUserManagementService _userService;
 
         [ObservableProperty]
         private ObservableCollection<Employee> _employees = new();
@@ -38,6 +40,10 @@ namespace PharmacyClient.ViewModels
         {
             _context = new PharmacyClient.Data.PharmacyDbContext();
             Departments.Add("Все");
+            
+            // Инициализируем сервис управления пользователями
+            var connectionString = _context.Database.GetConnectionString();
+            _userService = new SqlServerUserManagementService(connectionString!);
         }
 
         [RelayCommand]
@@ -162,10 +168,29 @@ namespace PharmacyClient.ViewModels
                 _context.Employees.Add(newEmployee);
                 await _context.SaveChangesAsync();
 
-                StatusMessage = "Сотрудник добавлен";
+                // Автоматически создаем учетную запись SQL Server для нового сотрудника
+                try
+                {
+                    await _userService.CreateUserAsync(newEmployee, "12345678");
+                    StatusMessage = $"Сотрудник добавлен. Логин для входа: {newEmployee.LastName.ToLower()}";
+                }
+                catch (Exception sqlEx)
+                {
+                    StatusMessage = $"Сотрудник добавлен, но не удалось создать учетную запись: {sqlEx.Message}";
+                    MessageBox.Show(
+                        $"Сотрудник добавлен в базу данных, но не удалось автоматически создать учетную запись SQL Server.\n\n" +
+                        $"Ошибка: {sqlEx.Message}\n\n" +
+                        $"Убедитесь, что вы вошли под учетной записью с правами sysadmin.",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
                 await LoadEmployeesAsync();
                 
-                MessageBox.Show("Сотрудник успешно добавлен!\n\nПосле добавления сотрудника необходимо создать для него учетную запись в SQL Server через скрипт.", 
+                MessageBox.Show(
+                    $"Сотрудник успешно добавлен!\n\n" +
+                    $"Логин для входа: {newEmployee.LastName.ToLower()}\n" +
+                    $"Пароль: 12345678\n\n" +
+                    $"Учетная запись SQL Server создана автоматически.",
                     "Добавление сотрудника", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -187,20 +212,66 @@ namespace PharmacyClient.ViewModels
 
             try
             {
-                // В реальном приложении здесь должно открываться окно редактирования
-                // Для простоты просто обновляем ModifiedDate
+                // Обновляем роль пользователя в SQL Server при изменении должности
+                try
+                {
+                    await _userService.UpdateUserRoleAsync(SelectedEmployee);
+                }
+                catch (Exception sqlEx)
+                {
+                    MessageBox.Show(
+                        $"Не удалось обновить роль в SQL Server.\n" +
+                        $"Ошибка: {sqlEx.Message}",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                // Обновляем ModifiedDate
                 SelectedEmployee.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
 
                 StatusMessage = "Сотрудник обновлен";
                 await LoadEmployeesAsync();
                 
-                MessageBox.Show("Данные сотрудника обновлены!", "Редактирование", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Данные сотрудника обновлены!\n\nРоль в SQL Server также обновлена.", 
+                    "Редактирование", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка обновления: {ex.Message}", "Ошибка", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async Task ResetPasswordAsync()
+        {
+            if (SelectedEmployee == null)
+            {
+                MessageBox.Show("Выберите сотрудника для сброса пароля", "Предупреждение", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Вы действительно хотите сбросить пароль для сотрудника {SelectedEmployee.FullName}?\n\n" +
+                $"Новый пароль будет: 12345678",
+                "Сброс пароля", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                await _userService.ResetPasswordAsync(SelectedEmployee, "12345678");
+                
+                MessageBox.Show(
+                    $"Пароль для сотрудника {SelectedEmployee.FullName} успешно сброшен!\n\n" +
+                    $"Новый пароль: 12345678",
+                    "Сброс пароля", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сброса пароля: {ex.Message}", "Ошибка", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -217,7 +288,7 @@ namespace PharmacyClient.ViewModels
 
             var result = MessageBox.Show(
                 $"Вы действительно хотите удалить сотрудника {SelectedEmployee.FullName}?\n\n" +
-                $"Внимание: это не удалит учетную запись в SQL Server. Это нужно сделать отдельно.",
+                $"Внимание: это также удалит учетную запись SQL Server для этого сотрудника.",
                 "Удаление сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)
@@ -225,6 +296,21 @@ namespace PharmacyClient.ViewModels
 
             try
             {
+                // Сначала удаляем учетную запись SQL Server
+                try
+                {
+                    await _userService.DeleteUserAsync(SelectedEmployee);
+                }
+                catch (Exception sqlEx)
+                {
+                    MessageBox.Show(
+                        $"Не удалось автоматически удалить учетную запись SQL Server.\n" +
+                        $"Ошибка: {sqlEx.Message}\n\n" +
+                        $"Сотрудник будет удален из базы данных.",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                // Удаляем сотрудника из базы данных
                 _context.Employees.Remove(SelectedEmployee);
                 await _context.SaveChangesAsync();
 
@@ -232,7 +318,7 @@ namespace PharmacyClient.ViewModels
                 SelectedEmployee = null;
                 await LoadEmployeesAsync();
                 
-                MessageBox.Show("Сотрудник успешно удален!\n\nНе забудьте удалить учетную запись в SQL Server через скрипт.", 
+                MessageBox.Show("Сотрудник успешно удален!\n\nУчетная запись SQL Server также удалена.", 
                     "Удаление сотрудника", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
