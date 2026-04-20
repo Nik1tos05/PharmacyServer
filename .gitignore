@@ -1,37 +1,52 @@
-```
-# Build artifacts
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
 *.obj
-*.exe
 *.dll
 *.so
-*.a
+*.exe
+*.class
 *.out
+*.a
+*.lib
 
 # Dependencies
-packages/
-bin/
-obj/
-Debug/
-Release/
-
-# Logs
-*.log
-
-# Environment
+node_modules/
+venv/
+.venv/
 .env
 .env.local
-*.env.*
+.env.*
+
+# Build directories
+dist/
+build/
+target/
+*.egg-info/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
 
 # Editors
-.vs/
 .vscode/
-*.userprefs
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+.idea/
+*.swp
+*.swo
 
-# OS
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# OS generated files
 .DS_Store
 Thumbs.db
-```
+
+# MyPy cache
+.mypy_cache/
+# Pytest cache
+.pytest_cache/
