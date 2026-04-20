@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
 using PharmacyClient.Services;
+using PharmacyClient.Views;
 using PharmacyServer.Models;
 
 namespace PharmacyClient.ViewModels
@@ -145,57 +146,18 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
-                var newEmployee = new Employee
-                {
-                    LastName = "Новая Фамилия",
-                    FirstName = "Имя",
-                    Patronymic = "Отчество",
-                    Position = "Должность",
-                    Department = "Отдел",
-                    HireDate = DateOnly.FromDateTime(DateTime.Today),
-                    Phone = "+7(000)000-00-00",
-                    Email = "email@example.com",
-                    PassportSeries = "0000",
-                    PassportNumber = "000000",
-                    Salary = 0,
-                    IsManager = false,
-                    CanSignDocuments = false,
-                    IsActive = true,
-                    CreatedDate = DateTime.Now,
-                    ModifiedDate = DateTime.Now
-                };
-
-                _context.Employees.Add(newEmployee);
-                await _context.SaveChangesAsync();
-
-                // Автоматически создаем учетную запись SQL Server для нового сотрудника
-                try
-                {
-                    await _userService.CreateUserAsync(newEmployee, "12345678");
-                    StatusMessage = $"Сотрудник добавлен. Логин для входа: {newEmployee.LastName.ToLower()}";
-                }
-                catch (Exception sqlEx)
-                {
-                    StatusMessage = $"Сотрудник добавлен, но не удалось создать учетную запись: {sqlEx.Message}";
-                    MessageBox.Show(
-                        $"Сотрудник добавлен в базу данных, но не удалось автоматически создать учетную запись SQL Server.\n\n" +
-                        $"Ошибка: {sqlEx.Message}\n\n" +
-                        $"Убедитесь, что вы вошли под учетной записью с правами sysadmin.",
-                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-                await LoadEmployeesAsync();
+                // Открываем диалоговое окно для добавления сотрудника
+                var dialog = new EmployeeDialogView(null, Departments);
+                dialog.Owner = System.Windows.Application.Current.MainWindow;
                 
-                MessageBox.Show(
-                    $"Сотрудник успешно добавлен!\n\n" +
-                    $"Логин для входа: {newEmployee.LastName.ToLower()}\n" +
-                    $"Пароль: 12345678\n\n" +
-                    $"Учетная запись SQL Server создана автоматически.",
-                    "Добавление сотрудника", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (dialog.ShowDialog() == true)
+                {
+                    await LoadEmployeesAsync();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка", 
+                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -205,42 +167,29 @@ namespace PharmacyClient.ViewModels
         {
             if (SelectedEmployee == null)
             {
-                MessageBox.Show("Выберите сотрудника для редактирования", "Предупреждение", 
+                MessageBox.Show("Выберите сотрудника для редактирования", "Предупреждение",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             try
             {
-                // Обновляем роль пользователя в SQL Server при изменении должности
-                try
-                {
-                    await _userService.UpdateUserRoleAsync(SelectedEmployee);
-                }
-                catch (Exception sqlEx)
-                {
-                    MessageBox.Show(
-                        $"Не удалось обновить роль в SQL Server.\n" +
-                        $"Ошибка: {sqlEx.Message}",
-                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-                // Обновляем ModifiedDate
-                SelectedEmployee.ModifiedDate = DateTime.Now;
-                await _context.SaveChangesAsync();
-
-                StatusMessage = "Сотрудник обновлен";
-                await LoadEmployeesAsync();
+                // Открываем диалоговое окно для редактирования сотрудника
+                var dialog = new EmployeeDialogView(SelectedEmployee, Departments);
+                dialog.Owner = System.Windows.Application.Current.MainWindow;
                 
-                MessageBox.Show("Данные сотрудника обновлены!\n\nРоль в SQL Server также обновлена.", 
-                    "Редактирование", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (dialog.ShowDialog() == true)
+                {
+                    await LoadEmployeesAsync();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка обновления: {ex.Message}", "Ошибка", 
+                MessageBox.Show($"Ошибка редактирования: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         [RelayCommand]
         private async Task ResetPasswordAsync()
