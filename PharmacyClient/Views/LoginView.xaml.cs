@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using PharmacyClient.ViewModels;
 
 namespace PharmacyClient.Views
@@ -8,11 +9,13 @@ namespace PharmacyClient.Views
         public LoginView()
         {
             InitializeComponent();
-            
-            // Load employees on startup
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
             if (DataContext is LoginViewModel vm)
             {
-                vm.LoadEmployeesCommand.Execute(null);
+                vm.Password = ((PasswordBox)sender).Password;
             }
         }
     }
