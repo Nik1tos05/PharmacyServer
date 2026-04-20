@@ -71,20 +71,43 @@ namespace PharmacyClient.ViewModels
                 await using var connection = new SqlConnection(connectionString);
                 await connection.OpenAsync();
 
+                // Словарь соответствия: Логин (латиница) -> Фамилия (кириллица)
+                var loginMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "ivanov", "Иванов" },
+                    { "petrova", "Петрова" },
+                    { "sidorov", "Сидоров" },
+                    { "kuznetsova", "Кузнецова" },
+                    { "smirnov", "Смирнов" },
+                    { "morozova", "Морозова" },
+                    { "volkov", "Волков" },
+                    { "zaytseva", "Зайцева" },
+                    { "novikov", "Новиков" },
+                    { "lebedeva", "Лебедева" }
+                };
+
+                // Преобразуем логин в фамилию
+                if (!loginMap.TryGetValue(Login, out string? lastNameCyrillic))
+                {
+                    ErrorMessage = $"Неизвестный логин '{Login}'. Проверьте правильность ввода или обратитесь к администратору.";
+                    IsLoading = false;
+                    return;
+                }
+
                 // Получаем информацию о текущем пользователе из БД
-                // Ищем сотрудника по фамилии (логин у нас = фамилия в нижнем регистре)
+                // Ищем сотрудника по фамилии (кириллица)
                 var employeeQuery = @"
                     SELECT TOP 1 
                         e.EmployeeID, e.LastName, e.FirstName, e.Patronymic, e.Position, e.Department,
                         e.IsManager, e.CanSignDocuments, e.IsActive
                     FROM dbo.Employees e
-                    WHERE LOWER(e.LastName) = LOWER(@Login) AND e.IsActive = 1";
+                    WHERE e.LastName = @LastName AND e.IsActive = 1";
 
                 Employee? employee = null;
 
                 await using (var cmd = new SqlCommand(employeeQuery, connection))
                 {
-                    cmd.Parameters.AddWithValue("@Login", Login);
+                    cmd.Parameters.AddWithValue("@LastName", lastNameCyrillic);
                     
                     await using var reader = await cmd.ExecuteReaderAsync();
                     if (await reader.ReadAsync())
