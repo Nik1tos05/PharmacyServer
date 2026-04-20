@@ -1,18 +1,18 @@
 ```
 # Build artifacts
-bin/
-obj/
-*.dll
+*.obj
 *.exe
-*.pdb
-*.config
-*.manifest
-*.lockb
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 packages/
-node_modules/
-vendor/
+bin/
+obj/
+Debug/
+Release/
 
 # Logs
 *.log
@@ -25,15 +25,13 @@ vendor/
 # Editors
 .vs/
 .vscode/
-.idea/
+*.userprefs
 *.user
-*.userosscache
 *.suo
-*.csproj.user
+*.userosscache
+*.sln.docstates
 
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
 ```

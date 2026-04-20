@@ -42,9 +42,7 @@ namespace PharmacyClient.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure all entities from the shared models
-            OnModelCreatingPartial(modelBuilder);
+            modelBuilder.ConfigureModel();
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
