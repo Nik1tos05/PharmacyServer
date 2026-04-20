@@ -9,7 +9,7 @@ namespace PharmacyClient.ViewModels
 {
     public partial class AdministrationViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
+        private readonly PharmacyClient.Data.PharmacyDbContext _context;
 
         [ObservableProperty]
         private ObservableCollection<UserAccountInfo> _userAccounts = new();
@@ -44,7 +44,7 @@ namespace PharmacyClient.ViewModels
 
         public AdministrationViewModel()
         {
-            _context = new PharmacyDbContext();
+            _context = new PharmacyClient.Data.PharmacyDbContext();
         }
 
         [RelayCommand]
