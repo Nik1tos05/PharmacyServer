@@ -63,6 +63,8 @@
                 <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"
                          Height="30"
                          Margin="5"
+                         Padding="8,4"
+                         VerticalContentAlignment="Center"
                          FontSize="14"/>
             </StackPanel>
             
@@ -72,6 +74,8 @@
                 <PasswordBox x:Name="PasswordBox"
                              Height="30"
                              Margin="5"
+                             Padding="8,4"
+                             VerticalContentAlignment="Center"
                              FontSize="14"
                              PasswordChanged="PasswordBox_PasswordChanged"/>
             </StackPanel>
