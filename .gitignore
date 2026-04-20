@@ -1,97 +1,36 @@
 ```
-# Dependencies
-node_modules/
-.npm/
-bower_components/
-
 # Build artifacts
-dist/
-build/
-target/
-out/
 bin/
 obj/
-lib/
+*.dll
+*.exe
+*.pdb
+*.userprefs
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
+# Dependencies
+packages/
+node_modules/
+.nuget/
+
+# Logs
+*.log
+
+# Environment
 .env
 .env.local
-.env.*
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
+*.env.*
 
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.tar
-target/
-.gradle/
-build/
-
-# C#
-*.exe
-*.dll
-*.so
-*.dylib
-*.nupkg
-[Nn]uget
-[Oo]bj/
-[Bb]in/
-[Dd]ebug/
-[Rr]elease/
-[Tt]est[Rr]esults/
-*.user
-*.userosscache
-*.sln.docstates
-
-# JavaScript/Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-jspm_packages/
-
-# IDE files
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-*.out
-
-# Environment specific
-.env
-.env.local
-.env.*
-
-# Coverage reports
+# Test and coverage
+TestResults/
 coverage/
-*.gcov
-*.lcov
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 ```
