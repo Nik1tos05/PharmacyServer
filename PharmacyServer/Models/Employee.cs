@@ -39,6 +39,8 @@ public partial class Employee
 
     public DateTime? ModifiedDate { get; set; }
 
+    public string FullName => $"{LastName} {FirstName}{(string.IsNullOrEmpty(Patronymic) ? "" : " " + Patronymic)}".Trim();
+
     public virtual ICollection<ComponentRequest> ComponentRequestApprovedByEmployees { get; set; } = new List<ComponentRequest>();
 
     public virtual ICollection<ComponentRequest> ComponentRequestRequestedByEmployees { get; set; } = new List<ComponentRequest>();
