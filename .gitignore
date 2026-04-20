@@ -1,18 +1,43 @@
 ```
+# Build artifacts
+*.obj
+*.exe
+*.dll
+*.pdb
+*.userprefs
+*.cache
+bin/
+obj/
+Debug/
+Release/
+
+# Dependencies
+packages/
+node_modules/
+.nuget/
+
+# Logs
+*.log
+
 # Environment
 .env
 .env.local
 *.env.*
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
 # Editors
+.vs/
+.vshost.exe
+.user
 .vscode/
 .idea/
 
-# Original rules preserved
-*.log
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# User-specific files
+*.userprefs
+*.suo
+*.user
 ```

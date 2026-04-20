@@ -42,6 +42,7 @@ namespace PharmacyClient
         public string? Department { get; set; }
         public bool IsManager { get; set; }
         public bool CanSignDocuments { get; set; }
+        public string ConnectionString { get; set; } = string.Empty;
         
         // Computed role based on employee properties
         public UserRole Role

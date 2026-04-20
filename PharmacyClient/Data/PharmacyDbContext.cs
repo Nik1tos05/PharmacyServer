@@ -35,7 +35,16 @@ namespace PharmacyClient.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;");
+                // Используем строку подключения из текущей сессии пользователя, если она есть
+                var connectionString = App.CurrentUserSession?.ConnectionString;
+                
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    // Если сессия не установлена, используем строку по умолчанию
+                    connectionString = "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
+                }
+                
+                optionsBuilder.UseSqlServer(connectionString);
             }
         }
 
