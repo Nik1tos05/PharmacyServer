@@ -10,7 +10,7 @@ namespace PharmacyClient.ViewModels
 {
     public partial class EmployeesViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
+        private readonly PharmacyClient.Data.PharmacyDbContext _context;
 
         [ObservableProperty]
         private ObservableCollection<Employee> _employees = new();
@@ -36,7 +36,7 @@ namespace PharmacyClient.ViewModels
 
         public EmployeesViewModel()
         {
-            _context = new PharmacyDbContext();
+            _context = new PharmacyClient.Data.PharmacyDbContext();
             Departments.Add("Все");
         }
 
