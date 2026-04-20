@@ -77,7 +77,7 @@ namespace PharmacyClient.ViewModels
                     SELECT TOP 1 
                         e.EmployeeID, e.LastName, e.FirstName, e.Patronymic, e.Position, e.Department,
                         e.IsManager, e.CanSignDocuments, e.IsActive
-                    FROM Employees e
+                    FROM dbo.Employees e
                     WHERE LOWER(e.LastName) = LOWER(@Login) AND e.IsActive = 1";
 
                 Employee? employee = null;
