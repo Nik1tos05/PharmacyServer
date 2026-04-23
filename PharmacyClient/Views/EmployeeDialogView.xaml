@@ -68,7 +68,7 @@
 
                 <!-- Дата приема -->
                 <TextBlock Grid.Row="11" Text="Дата приема" Margin="0,0,0,5"/>
-                <DatePicker Grid.Row="12" SelectedDate="{Binding HireDate}" 
+                <DatePicker Grid.Row="12" SelectedDate="{Binding HireDate, Converter={StaticResource DateOnlyToDateTimeConverter}}" 
                             Margin="0,0,0,15" Padding="8"/>
 
                 <!-- Телефон -->
