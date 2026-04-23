@@ -1,0 +1,226 @@
+using System.Collections.ObjectModel;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
+using PharmacyClient.Data;
+using PharmacyClient.Models;
+
+namespace PharmacyClient.ViewModels
+{
+    public partial class MedicinesViewModel : ObservableObject
+    {
+        private readonly PharmacyDbContext _context;
+
+        [ObservableProperty]
+        private ObservableCollection<Medicine> _medicines = new();
+
+        [ObservableProperty]
+        private Medicine? _selectedMedicine;
+
+        [ObservableProperty]
+        private string _searchText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isLoading;
+
+        [ObservableProperty]
+        private string _statusMessage = string.Empty;
+
+        [ObservableProperty]
+        private string _filterCategory = "Все";
+
+        [ObservableProperty]
+        private ObservableCollection<string> _categories = new();
+
+        [ObservableProperty]
+        private ObservableCollection<MedicineType> _medicineTypes = new();
+
+        [ObservableProperty]
+        private ObservableCollection<UnitsOfMeasure> _unitsOfMeasure = new();
+
+        public MedicinesViewModel()
+        {
+            _context = new PharmacyDbContext();
+            Categories.Add("Все");
+        }
+
+        [RelayCommand]
+        private async Task LoadMedicinesAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                StatusMessage = "Загрузка данных...";
+
+                var query = _context.Medicines
+                    .Include(m => m.Category)
+                    .Include(m => m.MedicineType)
+                    .Include(m => m.Unit)
+                    .AsQueryable();
+
+                // Применяем поиск
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    query = query.Where(m => 
+                        m.MedicineName.Contains(SearchText) ||
+                        (m.Description != null && m.Description.Contains(SearchText)));
+                }
+
+                // Применяем фильтр по категории
+                if (!string.IsNullOrEmpty(FilterCategory) && FilterCategory != "Все")
+                {
+                    query = query.Where(m => m.Category != null && m.Category.CategoryName == FilterCategory);
+                }
+
+                var medicines = await query.OrderBy(m => m.MedicineName).ToListAsync();
+
+                Medicines.Clear();
+                foreach (var med in medicines)
+                {
+                    Medicines.Add(med);
+                }
+
+                // Обновляем список категорий
+                await LoadCategoriesAsync();
+                
+                // Загружаем типы лекарств и единицы измерения для редактора
+                await LoadTypesAndUnitsAsync();
+
+                StatusMessage = $"Загружено лекарств: {Medicines.Count}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка загрузки: {ex.Message}";
+                MessageBox.Show($"Ошибка загрузки лекарств: {ex.Message}", "Ошибка", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task LoadCategoriesAsync()
+        {
+            try
+            {
+                var categories = await _context.MedicineCategories
+                    .Where(c => c.CategoryName != null)
+                    .Select(c => c.CategoryName!)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToListAsync();
+
+                Categories.Clear();
+                Categories.Add("Все");
+                foreach (var cat in categories)
+                {
+                    Categories.Add(cat);
+                }
+            }
+            catch
+            {
+                // Игнорируем ошибки при загрузке категорий
+            }
+        }
+
+        private async Task LoadTypesAndUnitsAsync()
+        {
+            try
+            {
+                MedicineTypes = new ObservableCollection<MedicineType>(
+                    await _context.MedicineTypes.ToListAsync());
+                
+                UnitsOfMeasure = new ObservableCollection<UnitsOfMeasure>(
+                    await _context.UnitsOfMeasures.ToListAsync());
+            }
+            catch
+            {
+                // Игнорируем ошибки
+            }
+        }
+
+        [RelayCommand]
+        private void Search()
+        {
+            LoadMedicinesCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void ClearSearch()
+        {
+            SearchText = string.Empty;
+            FilterCategory = "Все";
+            LoadMedicinesCommand.Execute(null);
+        }
+
+        partial void OnFilterCategoryChanged(string value)
+        {
+            LoadMedicinesCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private async Task AddMedicineAsync()
+        {
+            MessageBox.Show("Функция добавления лекарства будет реализована в диалоговом окне", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private async Task EditMedicineAsync()
+        {
+            if (SelectedMedicine == null)
+            {
+                MessageBox.Show("Выберите лекарство для редактирования", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            MessageBox.Show($"Редактирование лекарства: {SelectedMedicine.MedicineName}", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private async Task DeleteMedicineAsync()
+        {
+            if (SelectedMedicine == null)
+            {
+                MessageBox.Show("Выберите лекарство для удаления", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Вы действительно хотите удалить лекарство \"{SelectedMedicine.MedicineName}\"?",
+                "Удаление лекарства", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                _context.Medicines.Remove(SelectedMedicine);
+                await _context.SaveChangesAsync();
+
+                StatusMessage = "Лекарство удалено";
+                SelectedMedicine = null;
+                await LoadMedicinesAsync();
+                
+                MessageBox.Show("Лекарство успешно удалено", "Удаление лекарства", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async Task RefreshAsync()
+        {
+            await LoadMedicinesAsync();
+        }
+    }
+}
