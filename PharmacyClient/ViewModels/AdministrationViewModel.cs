@@ -82,6 +82,19 @@ namespace PharmacyClient.ViewModels
                     });
                 }
 
+                // Загружаем связи логинов с сотрудниками из таблицы EmployeeLogins
+                var employeeLogins = await _context.EmployeeLogins
+                    .Include(el => el.Employee)
+                    .ToListAsync();
+
+                // Создаем словарь для быстрого поиска сотрудника по логину
+                var loginToEmployeeMap = employeeLogins
+                    .Where(el => el.Employee != null)
+                    .ToDictionary(
+                        el => CreateLoginName(el.Employee!.LastName, el.Employee!.FirstName).ToLower(),
+                        el => el.Employee!
+                    );
+
                 // Получаем список пользователей БД и их роли через LINQ к системным таблицам
                 var connectionString = App.CurrentUserSession?.ConnectionString;
                 if (string.IsNullOrEmpty(connectionString))
@@ -108,8 +121,19 @@ namespace PharmacyClient.ViewModels
                 // Объединяем информацию о пользователях с сотрудниками через LINQ
                 foreach (var userInfo in userQuery)
                 {
-                    var employee = employees.FirstOrDefault(e => 
-                        CreateLoginName(e.LastName, e.FirstName).ToLower() == userInfo.UserName.ToLower());
+                    // Пытаемся найти сотрудника сначала по словарю (из EmployeeLogins), затем по прямому сравнению
+                    Employee? employee = null;
+                    
+                    if (loginToEmployeeMap.TryGetValue(userInfo.UserName.ToLower(), out var empFromLogin))
+                    {
+                        employee = empFromLogin;
+                    }
+                    else
+                    {
+                        // Если не нашли через EmployeeLogins, ищем по совпадению имени
+                        employee = employees.FirstOrDefault(e => 
+                            CreateLoginName(e.LastName, e.FirstName).ToLower() == userInfo.UserName.ToLower());
+                    }
 
                     UserAccounts.Add(new UserAccountInfo
                     {

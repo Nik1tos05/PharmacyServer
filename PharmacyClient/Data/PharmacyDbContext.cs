@@ -18,6 +18,7 @@ namespace PharmacyClient.Data
         public virtual DbSet<ComponentRequest> ComponentRequests { get; set; }
         public virtual DbSet<Doctor> Doctors { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
+        public virtual DbSet<EmployeeLogin> EmployeeLogins { get; set; }
         public virtual DbSet<InventoryCheck> InventoryChecks { get; set; }
         public virtual DbSet<InventoryDetail> InventoryDetails { get; set; }
         public virtual DbSet<Medicine> Medicines { get; set; }

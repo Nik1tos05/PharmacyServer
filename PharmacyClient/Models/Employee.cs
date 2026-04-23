@@ -41,6 +41,8 @@ public partial class Employee
 
     public string FullName => $"{LastName} {FirstName}{(string.IsNullOrEmpty(Patronymic) ? "" : " " + Patronymic)}".Trim();
 
+    public virtual ICollection<EmployeeLogin> EmployeeLogins { get; set; } = new List<EmployeeLogin>();
+
     public virtual ICollection<ComponentRequest> ComponentRequestApprovedByEmployees { get; set; } = new List<ComponentRequest>();
 
     public virtual ICollection<ComponentRequest> ComponentRequestRequestedByEmployees { get; set; } = new List<ComponentRequest>();
