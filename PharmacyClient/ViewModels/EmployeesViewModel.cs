@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
 using PharmacyClient.Services;
 using PharmacyClient.Views;
-using PharmacyServer.Models;
+using PharmacyClient.Models;
 
 namespace PharmacyClient.ViewModels
 {

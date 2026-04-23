@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
-using PharmacyServer.Models;
+using PharmacyClient.Models;
 
 namespace PharmacyClient.ViewModels
 {

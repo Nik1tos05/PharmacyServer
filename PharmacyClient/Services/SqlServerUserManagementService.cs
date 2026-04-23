@@ -2,7 +2,7 @@ using System;
 using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using PharmacyServer.Models;
+using PharmacyClient.Models;
 
 namespace PharmacyClient.Services
 {

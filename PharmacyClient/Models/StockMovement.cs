@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PharmacyServer.Models;
+namespace PharmacyClient.Models;
 
 public partial class StockMovement
 {

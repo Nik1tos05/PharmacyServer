@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PharmacyClient.Data;
 using PharmacyClient.Services;
-using PharmacyServer.Models;
+using PharmacyClient.Models;
 
 namespace PharmacyClient.Views
 {
