@@ -9,6 +9,7 @@
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:DateOnlyToDateTimeConverter x:Key="DateOnlyToDateTimeConverter"/>
             
             <!-- Global Styles -->
             <Style TargetType="Button">
