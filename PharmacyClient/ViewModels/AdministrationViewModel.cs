@@ -85,14 +85,14 @@ namespace PharmacyClient.ViewModels
                 // Загружаем связи логинов с сотрудниками из таблицы EmployeeLogins
                 var employeeLogins = await _context.EmployeeLogins
                     .Include(el => el.Employee)
+                    .Where(el => el.EmployeeId.HasValue)
                     .ToListAsync();
 
-                // Создаем словарь для быстрого поиска сотрудника по логину
-                // Используем TryAdd или группировку, чтобы избежать дубликатов ключей
-                var loginToEmployeeMap = new Dictionary<string, Employee>();
+                // Создаем словарь для быстрого поиска сотрудника по LoginName (ключу таблицы EmployeeLogins)
+                var loginToEmployeeMap = new Dictionary<string, Employee>(StringComparer.OrdinalIgnoreCase);
                 foreach (var el in employeeLogins.Where(el => el.Employee != null))
                 {
-                    var key = CreateLoginName(el.Employee!.LastName, el.Employee!.FirstName).ToLower();
+                    var key = el.LoginName;
                     if (!loginToEmployeeMap.ContainsKey(key))
                     {
                         loginToEmployeeMap[key] = el.Employee!;
@@ -125,16 +125,12 @@ namespace PharmacyClient.ViewModels
                 // Объединяем информацию о пользователях с сотрудниками через LINQ
                 foreach (var userInfo in userQuery)
                 {
-                    // Пытаемся найти сотрудника сначала по словарю (из EmployeeLogins), затем по прямому сравнению
+                    // Пытаемся найти сотрудника по словарю из EmployeeLogins (по LoginName)
                     Employee? employee = null;
                     
-                    if (loginToEmployeeMap.TryGetValue(userInfo.UserName.ToLower(), out var empFromLogin))
+                    if (!loginToEmployeeMap.TryGetValue(userInfo.UserName, out employee))
                     {
-                        employee = empFromLogin;
-                    }
-                    else
-                    {
-                        // Если не нашли через EmployeeLogins, ищем по совпадению имени
+                        // Если не нашли через EmployeeLogins, ищем по совпадению имени (резервный вариант)
                         employee = employees.FirstOrDefault(e => 
                             CreateLoginName(e.LastName, e.FirstName).ToLower() == userInfo.UserName.ToLower());
                     }
