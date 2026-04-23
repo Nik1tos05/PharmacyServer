@@ -57,8 +57,13 @@
             </MenuItem>
             
             <!-- Заказы - Manager and above -->
-            <MenuItem Header="_Заказы">
+            <MenuItem Header="_Заказы" Tag="Manager,Administrator">
                 <MenuItem Header="Заказы на производство" Tag="Manager,Administrator"/>
+            </MenuItem>
+            
+            <!-- Отчеты и запросы - Pharmacist and above -->
+            <MenuItem Header="_Отчеты и запросы" Tag="Pharmacist,Manager,Administrator">
+                <MenuItem Header="Выполнить запрос к БД" Tag="Pharmacist,Manager,Administrator"/>
             </MenuItem>
             
             <!-- Сотрудники - Administrator only -->
@@ -179,6 +184,10 @@
             
             <TabItem Header="Администрирование" x:Name="AdminTab">
                 <local:AdministrationView/>
+            </TabItem>
+            
+            <TabItem Header="Отчеты и запросы" x:Name="QueriesTab">
+                <local:QueriesView/>
             </TabItem>
         </TabControl>
         

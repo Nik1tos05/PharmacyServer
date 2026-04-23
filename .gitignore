@@ -1,43 +1,37 @@
 ```
 # Build artifacts
-bin/
-obj/
+*.o
+*.obj
 *.exe
 *.dll
-*.pdb
-*.nupkg
-*.snupkg
+*.so
+*.a
+*.out
 
 # Dependencies
 packages/
-node_modules/
+bin/
+obj/
+Debug/
+Release/
 
-# Logs
+# Logs and temp files
 *.log
+*.tmp
+*.swp
 
-# User-specific files
+# Editors
 .vs/
+.idea/
+*.userprefs
 *.user
-*.userosscache
 *.suo
-
-# Environment specific settings
-.env
-.env.local
-*.env.*
+*.userosscache
+*.sln.docstates
 
 # OS generated files
 .DS_Store
 Thumbs.db
-
-# Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Test and coverage
-coverage/
-htmlcov/
-*.coverage
+ehthumbs.db
+Icon?
 ```

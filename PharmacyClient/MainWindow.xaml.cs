@@ -137,6 +137,7 @@ namespace PharmacyClient
             OrdersTab.Visibility = role >= UserRole.Manager ? Visibility.Visible : Visibility.Collapsed;
             EmployeesTab.Visibility = role >= UserRole.Administrator ? Visibility.Visible : Visibility.Collapsed;
             AdminTab.Visibility = role >= UserRole.Administrator ? Visibility.Visible : Visibility.Collapsed;
+            QueriesTab.Visibility = role >= UserRole.Pharmacist ? Visibility.Visible : Visibility.Collapsed;
             
             // Menu item visibility
             foreach (MenuItem menuItem in MainMenu.Items)
