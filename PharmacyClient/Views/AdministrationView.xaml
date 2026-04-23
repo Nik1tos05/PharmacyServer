@@ -69,8 +69,7 @@
                         </ComboBox.Resources>
                     </ComboBox>
                     
-                    <TextBox Text="{Binding NewLoginName, UpdateSourceTrigger=PropertyChanged}"
-                             Width="150"
+                    <TextBox Width="150"
                              Margin="0,0,10,0"
                              VerticalAlignment="Center">
                         <TextBox.Text>
@@ -151,7 +150,7 @@
                     Margin="0,0,10,0"
                     Background="#f44336"
                     Foreground="White"
-                   .IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBoolConverter}}"/>
+                    IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBoolConverter}}"/>
             
             <Button Content="Сбросить пароль" 
                     Command="{Binding ResetPasswordCommand}"
@@ -159,7 +158,7 @@
                     Margin="0,0,10,0"
                     Background="#FF9800"
                     Foreground="White"
-                   .IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBoolConverter}}"/>
+                    IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBoolConverter}}"/>
             
             <TextBlock Text="{Binding StatusMessage}"
                        FontWeight="Bold"
