@@ -88,12 +88,16 @@ namespace PharmacyClient.ViewModels
                     .ToListAsync();
 
                 // Создаем словарь для быстрого поиска сотрудника по логину
-                var loginToEmployeeMap = employeeLogins
-                    .Where(el => el.Employee != null)
-                    .ToDictionary(
-                        el => CreateLoginName(el.Employee!.LastName, el.Employee!.FirstName).ToLower(),
-                        el => el.Employee!
-                    );
+                // Используем TryAdd или группировку, чтобы избежать дубликатов ключей
+                var loginToEmployeeMap = new Dictionary<string, Employee>();
+                foreach (var el in employeeLogins.Where(el => el.Employee != null))
+                {
+                    var key = CreateLoginName(el.Employee!.LastName, el.Employee!.FirstName).ToLower();
+                    if (!loginToEmployeeMap.ContainsKey(key))
+                    {
+                        loginToEmployeeMap[key] = el.Employee!;
+                    }
+                }
 
                 // Получаем список пользователей БД и их роли через LINQ к системным таблицам
                 var connectionString = App.CurrentUserSession?.ConnectionString;
