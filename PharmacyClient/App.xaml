@@ -8,6 +8,7 @@
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
             
             <!-- Global Styles -->
             <Style TargetType="Button">
