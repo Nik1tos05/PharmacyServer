@@ -132,6 +132,21 @@ namespace PharmacyClient.Data
                 entity.Property(e => e.Salary).HasColumnType("decimal(18, 2)");
             });
 
+            modelBuilder.Entity<EmployeeLogin>(entity =>
+            {
+                entity.HasKey(e => e.LoginName).HasName("PK__EmployeeLogins__LoginName");
+
+                entity.ToTable("EmployeeLogins");
+
+                entity.Property(e => e.LoginName).HasMaxLength(128).HasColumnName("LoginName");
+                entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("(sysdatetime())").HasColumnName("CreatedDate");
+
+                entity.HasOne(d => d.Employee).WithMany(p => p.EmployeeLogins)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .HasConstraintName("FK_EmployeeLogins_Employee");
+            });
+
             modelBuilder.Entity<InventoryCheck>(entity =>
             {
                 entity.HasKey(e => e.InventoryId).HasName("PK__Inventor__F5FDE6D3125C46FB");
