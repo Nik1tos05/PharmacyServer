@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
 using PharmacyClient.Models;
 using PharmacyClient.Services;
@@ -333,11 +334,7 @@ namespace PharmacyClient.ViewModels
             }
 
             var medicineId = SelectedMedicine?.MedicineId;
-            List<int>? typeIds = null;
-            if (SelectedMedicineType != null)
-            {
-                typeIds = new List<int> { SelectedMedicineType.MedicineTypeId };
-            }
+            List<int>? typeIds = SelectedMedicineType != null ? new List<int> { SelectedMedicineType.MedicineTypeId } : null;
 
             var result = _queriesService.GetPatientsWhoOrderedMedicines(
                 StartDate.Value, EndDate.Value, medicineId, typeIds);
@@ -369,12 +366,8 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery10()
         {
-            List<int>? typeIds = null;
-            if (SelectedMedicineType != null)
-            {
-                typeIds = new List<int> { SelectedMedicineType.MedicineTypeId };
-            }
-            return _queriesService.GetPreparationTechnologies(typeIds);
+            int? typeId = SelectedMedicineType?.MedicineTypeId;
+            return _queriesService.GetPreparationTechnologies(typeId.HasValue ? new List<int> { typeId.Value } : null);
         }
 
         private object? ExecuteQuery11()
@@ -391,12 +384,8 @@ namespace PharmacyClient.ViewModels
         private object? ExecuteQuery12()
         {
             int? medicineId = SelectedMedicine?.MedicineId;
-            List<int>? typeIds = null;
-            if (SelectedMedicineType != null)
-            {
-                typeIds = new List<int> { SelectedMedicineType.MedicineTypeId };
-            }
-            return _queriesService.GetMostActiveCustomers(medicineId, typeIds);
+            int? typeId = SelectedMedicineType?.MedicineTypeId;
+            return _queriesService.GetMostActiveCustomers(typeId, medicineId);
         }
 
         private object? ExecuteQuery13()
