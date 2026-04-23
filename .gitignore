@@ -5,45 +5,35 @@ obj/
 *.exe
 *.dll
 *.pdb
-*.userprefs
-*.cache
-*.compiled
 *.nupkg
 *.snupkg
+**/Debug/
+**/Release/
 
 # Dependencies
 packages/
 node_modules/
-vendor/
+**/node_modules/
 
 # Logs
 *.log
-*.userlog
 
-# Environment specific
-.vs/
-.vshost.exe
-.user
-.userosscache
-.usersettings
-.localhistory/
-.TemporaryKey.pfx
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
 # OS generated files
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Icon?
-desktop.ini
-
-# Testing
-TestResults/
-
-# IDE
-.vscode/
-.idea/
-
-# Configuration specific
-appsettings.Development.json
-appsettings.Production.json
 ```
