@@ -85,6 +85,7 @@ namespace PharmacyClient.ViewModels
                 // Загружаем все связи логинов с сотрудниками из таблицы EmployeeLogins
                 var employeeLogins = await _context.EmployeeLogins
                     .Include(el => el.Employee)
+                    .Where(el => el.EmployeeId.HasValue)
                     .ToListAsync();
 
                 // Отладочная информация
@@ -103,6 +104,10 @@ namespace PharmacyClient.ViewModels
                     {
                         loginToEmployeeMap[key] = el.Employee!;
                         System.Diagnostics.Debug.WriteLine($"Добавлен в словарь: '{key}' -> {el.Employee.LastName}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Дубликат ключа '{key}', пропускаем");
                     }
                 }
 
@@ -129,6 +134,12 @@ namespace PharmacyClient.ViewModels
                         ORDER BY u.name")
                     .ToListAsync();
 
+                System.Diagnostics.Debug.WriteLine($"Загружено пользователей БД: {userQuery.Count}");
+                foreach (var u in userQuery)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Пользователь БД: '{u.UserName}', Роль: '{u.RoleName}'");
+                }
+
                 // Объединяем информацию о пользователях с сотрудниками через LINQ
                 foreach (var userInfo in userQuery)
                 {
@@ -139,21 +150,33 @@ namespace PharmacyClient.ViewModels
                     
                     if (!loginToEmployeeMap.TryGetValue(userInfo.UserName, out employee))
                     {
-                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins");
+                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins (ключ '{userInfo.UserName}')");
                         
-                        // Если не нашли через EmployeeLogins, ищем по совпадению имени (резервный вариант)
-                        var generatedLogin = CreateLoginName(employees.FirstOrDefault()?.LastName ?? "", "");
-                        System.Diagnostics.Debug.WriteLine($"  Пробуем резервный поиск по сгенерированному логину");
+                        // Если не нашли через EmployeeLogins, пробуем найти напрямую через EmployeeLogins table
+                        var directLogin = await _context.EmployeeLogins
+                            .Include(el => el.Employee)
+                            .FirstOrDefaultAsync(el => el.LoginName == userInfo.UserName);
                         
-                        foreach (var e in employees)
+                        if (directLogin != null && directLogin.Employee != null)
                         {
-                            var empLogin = CreateLoginName(e.LastName, e.FirstName);
-                            System.Diagnostics.Debug.WriteLine($"    Сотрудник {e.LastName} -> логин '{empLogin}' (ищем '{userInfo.UserName}')");
-                            if (empLogin.ToLower() == userInfo.UserName.ToLower())
+                            employee = directLogin.Employee;
+                            System.Diagnostics.Debug.WriteLine($"  Найдено через прямой запрос: {employee.LastName}");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  Не найдено через прямой запрос EmployeeLogins");
+                            
+                            // Резервный вариант: ищем по совпадению имени (транслитерация)
+                            foreach (var e in employees)
                             {
-                                employee = e;
-                                System.Diagnostics.Debug.WriteLine($"    Найдено совпадение!");
-                                break;
+                                var empLogin = CreateLoginName(e.LastName, e.FirstName);
+                                System.Diagnostics.Debug.WriteLine($"    Проверка сотрудника {e.LastName} -> логин '{empLogin}' (ищем '{userInfo.UserName}')");
+                                if (empLogin.ToLower() == userInfo.UserName.ToLower())
+                                {
+                                    employee = e;
+                                    System.Diagnostics.Debug.WriteLine($"    Найдено совпадение по транслитерации!");
+                                    break;
+                                }
                             }
                         }
                     }
@@ -400,12 +423,19 @@ namespace PharmacyClient.ViewModels
             await LoadUserAccountsAsync();
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = true)]
         private void OpenCreateUserForm()
         {
             // Открываем диалог создания пользователя
             SelectedEmployeeId = null;
             NewLoginName = string.Empty;
+        }
+
+        partial void OnSelectedUserChanged(UserAccountInfo? value)
+        {
+            // Обновляем состояние кнопок при изменении выбранного пользователя
+            DeleteUserCommand.NotifyCanExecuteChanged();
+            ResetPasswordCommand.NotifyCanExecuteChanged();
         }
     }
 
