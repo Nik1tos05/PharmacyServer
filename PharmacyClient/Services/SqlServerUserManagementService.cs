@@ -29,7 +29,7 @@ namespace PharmacyClient.Services
         /// <summary>
         /// Создает логин и пользователя SQL Server для нового сотрудника
         /// </summary>
-        public async Task CreateUserAsync(Employee employee, string password = "12345678")
+        public async Task CreateUserAsync(PharmacyClient.Models.Employee employee, string password = "12345678")
         {
             if (string.IsNullOrEmpty(employee.LastName))
                 throw new ArgumentException("Фамилия сотрудника не может быть пустой");
@@ -103,7 +103,7 @@ namespace PharmacyClient.Services
         /// <summary>
         /// Удаляет логин и пользователя SQL Server при удалении сотрудника
         /// </summary>
-        public async Task DeleteUserAsync(Employee employee)
+        public async Task DeleteUserAsync(PharmacyClient.Models.Employee employee)
         {
             if (string.IsNullOrEmpty(employee.LastName))
                 return;
@@ -174,7 +174,7 @@ namespace PharmacyClient.Services
         /// <summary>
         /// Обновляет роль пользователя при изменении должности сотрудника
         /// </summary>
-        public async Task UpdateUserRoleAsync(Employee employee)
+        public async Task UpdateUserRoleAsync(PharmacyClient.Models.Employee employee)
         {
             if (string.IsNullOrEmpty(employee.LastName))
                 return;
@@ -224,7 +224,7 @@ namespace PharmacyClient.Services
         /// <summary>
         /// Сбрасывает пароль пользователя
         /// </summary>
-        public async Task ResetPasswordAsync(Employee employee, string newPassword = "12345678")
+        public async Task ResetPasswordAsync(PharmacyClient.Models.Employee employee, string newPassword = "12345678")
         {
             if (string.IsNullOrEmpty(employee.LastName))
                 throw new ArgumentException("Фамилия сотрудника не может быть пустой");
