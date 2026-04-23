@@ -1,1 +1,33 @@
-Nothing needs to be added to the .gitignore file based on the provided changes. The only modified file is a C# source code file (.cs), which should not be ignored. There are no build artifacts, dependencies, or temporary files in the change list that require ignoring.
+```
+# Build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.userprefs
+
+# Dependencies
+packages/
+node_modules/
+venv/
+.venv/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
