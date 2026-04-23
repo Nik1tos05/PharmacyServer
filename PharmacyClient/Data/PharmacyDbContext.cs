@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PharmacyServer.Models;
+using PharmacyClient.Models;
 
 namespace PharmacyClient.Data
 {
