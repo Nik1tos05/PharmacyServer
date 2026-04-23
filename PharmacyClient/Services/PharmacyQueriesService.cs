@@ -121,7 +121,7 @@ public class PharmacyQueriesService
                     join medicineComposition in _context.MedicineCompositions on order.MedicineId equals medicineComposition.MedicineId
                     join component in _context.Components on medicineComposition.ComponentId equals component.ComponentId
                     where componentIds == null || componentIds.Contains(component.ComponentId)
-                    group new { medicineComposition.Quantity, order.Quantity } by new 
+                    group new { CompQuantity = medicineComposition.Quantity, OrderQuantity = order.Quantity } by new 
                     { 
                         component.ComponentId, 
                         component.ComponentName,
@@ -133,7 +133,7 @@ public class PharmacyQueriesService
                         ComponentId = g.Key.ComponentId,
                         ComponentName = g.Key.ComponentName,
                         UnitName = g.Key.unit.UnitName,
-                        TotalQuantity = g.Sum(x => x.Quantity * x.Quantity),
+                        TotalQuantity = g.Sum(x => x.OrderQuantity * x.CompQuantity),
                         OrdersCount = g.Count()
                     };
 
