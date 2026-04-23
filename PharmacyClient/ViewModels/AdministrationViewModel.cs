@@ -82,20 +82,27 @@ namespace PharmacyClient.ViewModels
                     });
                 }
 
-                // Загружаем связи логинов с сотрудниками из таблицы EmployeeLogins
+                // Загружаем все связи логинов с сотрудниками из таблицы EmployeeLogins
                 var employeeLogins = await _context.EmployeeLogins
                     .Include(el => el.Employee)
-                    .Where(el => el.EmployeeId.HasValue)
                     .ToListAsync();
+
+                // Отладочная информация
+                System.Diagnostics.Debug.WriteLine($"Загружено записей EmployeeLogins: {employeeLogins.Count}");
+                foreach (var el in employeeLogins)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  LoginName: '{el.LoginName}', EmployeeId: {el.EmployeeId}, Employee: {(el.Employee != null ? el.Employee.LastName : "null")}");
+                }
 
                 // Создаем словарь для быстрого поиска сотрудника по LoginName (ключу таблицы EmployeeLogins)
                 var loginToEmployeeMap = new Dictionary<string, Employee>(StringComparer.OrdinalIgnoreCase);
-                foreach (var el in employeeLogins.Where(el => el.Employee != null))
+                foreach (var el in employeeLogins.Where(el => !string.IsNullOrEmpty(el.LoginName) && el.Employee != null))
                 {
-                    var key = el.LoginName;
+                    var key = el.LoginName.Trim();
                     if (!loginToEmployeeMap.ContainsKey(key))
                     {
                         loginToEmployeeMap[key] = el.Employee!;
+                        System.Diagnostics.Debug.WriteLine($"Добавлен в словарь: '{key}' -> {el.Employee.LastName}");
                     }
                 }
 
@@ -125,14 +132,34 @@ namespace PharmacyClient.ViewModels
                 // Объединяем информацию о пользователях с сотрудниками через LINQ
                 foreach (var userInfo in userQuery)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Поиск сотрудника для пользователя: '{userInfo.UserName}'");
+                    
                     // Пытаемся найти сотрудника по словарю из EmployeeLogins (по LoginName)
                     Employee? employee = null;
                     
                     if (!loginToEmployeeMap.TryGetValue(userInfo.UserName, out employee))
                     {
+                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins");
+                        
                         // Если не нашли через EmployeeLogins, ищем по совпадению имени (резервный вариант)
-                        employee = employees.FirstOrDefault(e => 
-                            CreateLoginName(e.LastName, e.FirstName).ToLower() == userInfo.UserName.ToLower());
+                        var generatedLogin = CreateLoginName(employees.FirstOrDefault()?.LastName ?? "", "");
+                        System.Diagnostics.Debug.WriteLine($"  Пробуем резервный поиск по сгенерированному логину");
+                        
+                        foreach (var e in employees)
+                        {
+                            var empLogin = CreateLoginName(e.LastName, e.FirstName);
+                            System.Diagnostics.Debug.WriteLine($"    Сотрудник {e.LastName} -> логин '{empLogin}' (ищем '{userInfo.UserName}')");
+                            if (empLogin.ToLower() == userInfo.UserName.ToLower())
+                            {
+                                employee = e;
+                                System.Diagnostics.Debug.WriteLine($"    Найдено совпадение!");
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Найдено в словаре: {employee?.LastName}");
                     }
 
                     UserAccounts.Add(new UserAccountInfo
