@@ -1,1 +1,49 @@
-Nothing should be ignored based on the provided changes. The only file added is a C# source file (.cs), which is source code that should be tracked in version control. No build artifacts, dependencies, temporary files, or other ignorable items were detected in the changes.
+```
+# Build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.userprefs
+*.cache
+*.compiled
+*.nupkg
+*.snupkg
+
+# Dependencies
+packages/
+node_modules/
+vendor/
+
+# Logs
+*.log
+*.userlog
+
+# Environment specific
+.vs/
+.vshost.exe
+.user
+.userosscache
+.usersettings
+.localhistory/
+.TemporaryKey.pfx
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Testing
+TestResults/
+
+# IDE
+.vscode/
+.idea/
+
+# Configuration specific
+appsettings.Development.json
+appsettings.Production.json
+```
