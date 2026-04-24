@@ -54,7 +54,7 @@
                         <DataGridTextColumn Header="Тип объекта" Binding="{Binding ItemType}" Width="80"/>
                         <DataGridTextColumn Header="ID объекта" Binding="{Binding ItemId}" Width="70"/>
                         <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="80"/>
-                        <DataGridTextColumn Header="Ед. изм." Binding="{Binding Unit.Name}" Width="80"/>
+                        <DataGridTextColumn Header="Ед. изм." Binding="{Binding Unit.UnitName}" Width="80"/>
                         <DataGridTextColumn Header="Пред. остаток" Binding="{Binding PreviousStock}" Width="90"/>
                         <DataGridTextColumn Header="Новый остаток" Binding="{Binding NewStock}" Width="90"/>
                         <DataGridTextColumn Header="Сотрудник" Binding="{Binding PerformedByEmployee.LastName}" Width="120"/>
