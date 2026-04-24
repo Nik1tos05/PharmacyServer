@@ -30,6 +30,7 @@ namespace PharmacyClient.ViewModels
         private bool _showDateRangeParameter;
         private bool _showMedicineParameter;
         private bool _showMedicineTypeParameter;
+        private bool _medicineSelectionRequired;
 
         private MedicineCategory? _selectedCategory;
         private DateTime? _startDate;
@@ -150,6 +151,12 @@ namespace PharmacyClient.ViewModels
             set => SetField(ref _showMedicineTypeParameter, value);
         }
 
+        public bool MedicineSelectionRequired
+        {
+            get => _medicineSelectionRequired;
+            set => SetField(ref _medicineSelectionRequired, value);
+        }
+
         public ObservableCollection<MedicineCategory> Categories { get; }
 
         public MedicineCategory? SelectedCategory
@@ -223,6 +230,7 @@ namespace PharmacyClient.ViewModels
             if (SelectedQuery == null)
             {
                 ShowParameters = false;
+                MedicineSelectionRequired = false;
                 return;
             }
 
@@ -231,6 +239,9 @@ namespace PharmacyClient.ViewModels
             ShowDateRangeParameter = (SelectedQuery.ParameterType & QueryParameterType.DateRange) == QueryParameterType.DateRange;
             ShowMedicineParameter = (SelectedQuery.ParameterType & QueryParameterType.Medicine) == QueryParameterType.Medicine;
             ShowMedicineTypeParameter = (SelectedQuery.ParameterType & QueryParameterType.MedicineType) == QueryParameterType.MedicineType;
+
+            // Для запросов 11 и 13 требуется выбор лекарства, но список лекарств нужно показать после первого нажатия
+            MedicineSelectionRequired = SelectedQuery.Id == 11 || SelectedQuery.Id == 13;
 
             // Устанавливаем значения по умолчанию для дат
             if (ShowDateRangeParameter && !StartDate.HasValue)
@@ -321,7 +332,19 @@ namespace PharmacyClient.ViewModels
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return null;
             }
-            return _queriesService.GetComponentUsage(StartDate.Value, EndDate.Value);
+            
+            try
+            {
+                return _queriesService.GetComponentUsage(StartDate.Value, EndDate.Value);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка выполнения запроса 4: {ex.Message}";
+                MessageBox.Show($"Ошибка запроса 4: {ex.Message}\n\nДетали: {ex.InnerException?.Message ?? "Нет дополнительных деталей"}", 
+                    "Ошибка выполнения запроса 4", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
         }
 
         private object? ExecuteQuery5()
@@ -372,13 +395,32 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery11()
         {
+            // Если лекарство не выбрано, показываем список всех лекарств для выбора
             if (SelectedMedicine == null)
             {
-                MessageBox.Show("Выберите лекарство", "Предупреждение", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
+                if (Medicines.Count == 0)
+                {
+                    LoadReferenceData();
+                }
+                
+                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить' снова";
+                ShowMedicineParameter = true; // Показываем ComboBox с лекарствами
                 return null;
             }
-            return _queriesService.GetMedicinePriceInfo(SelectedMedicine.MedicineId);
+            
+            try
+            {
+                return _queriesService.GetMedicinePriceInfo(SelectedMedicine.MedicineId);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка выполнения запроса 11: {ex.Message}";
+                MessageBox.Show($"Ошибка запроса 11: {ex.Message}", 
+                    "Ошибка выполнения запроса 11", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
         }
 
         private object? ExecuteQuery12()
@@ -390,13 +432,32 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery13()
         {
+            // Если лекарство не выбрано, показываем список всех лекарств для выбора
             if (SelectedMedicine == null)
             {
-                MessageBox.Show("Выберите лекарство", "Предупреждение", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
+                if (Medicines.Count == 0)
+                {
+                    LoadReferenceData();
+                }
+                
+                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить' снова";
+                ShowMedicineParameter = true; // Показываем ComboBox с лекарствами
                 return null;
             }
-            return new[] { _queriesService.GetDetailedMedicineInfo(SelectedMedicine.MedicineId) };
+            
+            try
+            {
+                return new[] { _queriesService.GetDetailedMedicineInfo(SelectedMedicine.MedicineId) };
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка выполнения запроса 13: {ex.Message}";
+                MessageBox.Show($"Ошибка запроса 13: {ex.Message}", 
+                    "Ошибка выполнения запроса 13", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
         }
 
         private object? ExecuteQuery14()

@@ -114,7 +114,7 @@ public class PharmacyQueriesService
     /// <summary>
     /// Получить какой объем указанных веществ использован за указанный период
     /// </summary>
-    public List<ComponentUsageInfo> GetComponentUsage(DateTime startDate, DateTime endDate, List<int>? componentIds = null)
+    public List<ComponentUsageInfo>? GetComponentUsage(DateTime startDate, DateTime endDate, List<int>? componentIds = null)
     {
         var query = from order in _context.Orders
                     where order.OrderDate >= startDate && order.OrderDate <= endDate
@@ -338,7 +338,7 @@ public class PharmacyQueriesService
     /// Получить сведения о ценах на указанное лекарство в готовом виде, 
     /// об объеме и ценах на все компоненты, требующиеся для этого лекарства
     /// </summary>
-    public MedicinePriceInfo GetMedicinePriceInfo(int medicineId)
+    public MedicinePriceInfo? GetMedicinePriceInfo(int medicineId)
     {
         var medicine = _context.Medicines
             .Where(m => m.MedicineId == medicineId)
@@ -427,7 +427,7 @@ public class PharmacyQueriesService
     /// Получить сведения о конкретном лекарстве (его тип, способ приготовления, 
     /// названия всех компонент, цены, его количество на складе)
     /// </summary>
-    public DetailedMedicineInfo GetDetailedMedicineInfo(int medicineId)
+    public DetailedMedicineInfo? GetDetailedMedicineInfo(int medicineId)
     {
         var medicine = _context.Medicines
             .Where(m => m.MedicineId == medicineId)
@@ -540,7 +540,7 @@ public class PharmacyQueriesService
     /// <summary>
     /// Выдать пациенту название лекарства и способ приготовления согласно рецепту
     /// </summary>
-    public PrescriptionInfo GetPrescriptionInfo(int prescriptionId)
+    public PrescriptionInfo? GetPrescriptionInfo(int prescriptionId)
     {
         var prescription = _context.Prescriptions
             .Where(p => p.PrescriptionId == prescriptionId)
