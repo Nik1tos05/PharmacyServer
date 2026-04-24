@@ -1,49 +1,47 @@
 ```
-# Build artifacts and binaries
+# Compiled and build artifacts
+*.o
+*.obj
 *.exe
 *.dll
-*.pdb
-*.nupkg
-*.snupkg
-bin/
+*.so
+*.a
+*.out
 obj/
-**/Debug/
-**/Release/
+bin/
+Debug/
+Release/
 
 # Dependencies
-packages/
 node_modules/
-**/node_modules/
+packages/
 
-# Logs
+# Logs and temp files
 *.log
-**/*.log
+*.tmp
+*.swp
+*.swo
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
 # Editors
-.vs/
-.vim/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-
-# Test coverage
-coverage/
-htmlcov/
-*.coverage
+.vscode/
+.idea/
+*.userprefs
+*.user
+*.suo
+*.csproj.user
 
 # OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Icon?
 Thumbs.db
+
+# Build outputs
+dist/
+build/
+target/
+out/
 ```
