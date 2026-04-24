@@ -1,56 +1,42 @@
+```
 # Build artifacts
 bin/
 obj/
-*.dll
 *.exe
+*.dll
 *.pdb
-*.config
-*.manifest
+*.userprefs
 *.cache
+*.manifest
+*.lockb
 *.tmp
-
-# Dependencies
-packages/
-node_modules/
-
-# Logs
 *.log
 
-# Environment
-.env
-.env.local
-*.env.*
+# Dependency directories
+packages/
+node_modules/
+bower_components/
 
-# Editors
+# IDE files
 .vs/
-.vscode/
-.idea/
-*.userprefs
 *.user
+*.suo
+*.userosscache
+*.sln.docstates
 
 # OS generated files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Icon?
 desktop.ini
 
-# Testing
+# Environment specific settings
+.env
+.env.local
+.env.*
+!/.env.example
+
+# Test results
 TestResults/
-
-# NuGet
-*.nupkg
-.nuget/
-
-# Visual Studio
-*.userosscache
-*.suo
-*.user
-*.aps
-*.ncb
-*.ilk
-*.iobj
-*.ipdb
-*.tlog
-*.exp
-*.lib
-*.VC.db
-*.VC.VC.opendb
+```
