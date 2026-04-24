@@ -12,7 +12,6 @@ namespace PharmacyClient.ViewModels
 {
     public partial class EmployeesViewModel : ObservableObject
     {
-        private readonly PharmacyClient.Data.PharmacyDbContext _context;
         private readonly SqlServerUserManagementService _userService;
 
         [ObservableProperty]
@@ -39,7 +38,6 @@ namespace PharmacyClient.ViewModels
 
         public EmployeesViewModel()
         {
-            _context = new PharmacyClient.Data.PharmacyDbContext();
             Departments.Add("Все");
             
             // Инициализируем сервис управления пользователями
@@ -56,7 +54,8 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 StatusMessage = "Загрузка данных...";
 
-                var query = _context.Employees.AsQueryable();
+                await using var context = new PharmacyDbContext();
+                var query = context.Employees.AsNoTracking().AsQueryable();
 
                 // Применяем поиск
                 if (!string.IsNullOrWhiteSpace(SearchText))
@@ -103,7 +102,8 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
-                var departments = await _context.Employees
+                await using var context = new PharmacyDbContext();
+                var departments = await context.Employees
                     .Where(e => e.Department != null)
                     .Select(e => e.Department!)
                     .Distinct()
@@ -261,8 +261,13 @@ namespace PharmacyClient.ViewModels
                 }
 
                 // Удаляем сотрудника из базы данных
-                _context.Employees.Remove(SelectedEmployee);
-                await _context.SaveChangesAsync();
+                await using var context = new PharmacyDbContext();
+                var employeeToDelete = await context.Employees.FindAsync(SelectedEmployee.EmployeeId);
+                if (employeeToDelete != null)
+                {
+                    context.Employees.Remove(employeeToDelete);
+                    await context.SaveChangesAsync();
+                }
 
                 StatusMessage = "Сотрудник удален";
                 SelectedEmployee = null;

@@ -10,8 +10,6 @@ namespace PharmacyClient.ViewModels
 {
     public partial class PatientsViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
-
         [ObservableProperty]
         private ObservableCollection<Patient> _patients = new();
 
@@ -29,7 +27,6 @@ namespace PharmacyClient.ViewModels
 
         public PatientsViewModel()
         {
-            _context = new PharmacyDbContext();
         }
 
         [RelayCommand]
@@ -40,7 +37,8 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 StatusMessage = "Загрузка данных...";
 
-                var query = _context.Patients.AsQueryable();
+                await using var context = new PharmacyDbContext();
+                var query = context.Patients.AsNoTracking().AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(SearchText))
                 {
