@@ -149,7 +149,16 @@
             
             <!-- Additional tabs will be shown/hidden based on role -->
             <TabItem Header="Лекарства" x:Name="MedicinesTab">
-                <local:MedicinesView/>
+                <Grid Margin="10">
+                    <TabControl>
+                        <TabItem Header="Реестр лекарств">
+                            <local:MedicinesView/>
+                        </TabItem>
+                        <TabItem Header="Технологии приготовления">
+                            <local:TechnologiesView/>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
             </TabItem>
             
             <TabItem Header="Компоненты" x:Name="ComponentsTab">
@@ -170,15 +179,11 @@
             </TabItem>
             
             <TabItem Header="Склад" x:Name="WarehouseTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел управления складом" FontSize="16"/>
-                </Grid>
+                <local:WarehouseView/>
             </TabItem>
             
             <TabItem Header="Заказы" x:Name="OrdersTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел управления заказами" FontSize="16"/>
-                </Grid>
+                <local:OrdersView/>
             </TabItem>
             
             <TabItem Header="Сотрудники" x:Name="EmployeesTab">
