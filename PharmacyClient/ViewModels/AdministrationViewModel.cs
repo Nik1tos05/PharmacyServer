@@ -151,25 +151,26 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 var connectionString = App.CurrentUserSession?.ConnectionString;
                 
-                // Создаем строку подключения к master для вызова хранимой процедуры
+                // Создаем строку подключения к базе данных для вызова хранимой процедуры
                 var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString)
                 {
-                    InitialCatalog = "master"
+                    InitialCatalog = "PharmacyDB"
                 };
-                var masterConnectionString = builder.ConnectionString;
+                var dbConnectionString = builder.ConnectionString;
 
-                await using var masterConnection = new Microsoft.Data.SqlClient.SqlConnection(masterConnectionString);
-                await masterConnection.OpenAsync();
+                await using var dbConnection = new Microsoft.Data.SqlClient.SqlConnection(dbConnectionString);
+                await dbConnection.OpenAsync();
 
-                // Вызываем хранимую процедуру для создания пользователя
+                // Вызываем хранимую процедуру для создания пользователя напрямую с параметрами
                 // Процедура выполняется с правами EXECUTE AS OWNER, поэтому не требует прав ALTER ANY LOGIN
-                var createLoginSql = $@"
-                    DECLARE @sql NVARCHAR(MAX);
-                    SET @sql = N'EXEC PharmacyDB.dbo.sp_CreateDatabaseUser @LoginName = ''{NewLoginName}'', @Password = ''{NewPassword}'', @RoleName = ''{SelectedRole}''';
-                    EXEC(@sql);";
-                
-                await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand(createLoginSql, masterConnection))
+                await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand("dbo.sp_CreateDatabaseUser", dbConnection))
                 {
+                    createCmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    
+                    createCmd.Parameters.AddWithValue("@LoginName", NewLoginName);
+                    createCmd.Parameters.AddWithValue("@Password", NewPassword);
+                    createCmd.Parameters.AddWithValue("@RoleName", SelectedRole);
+                    
                     await createCmd.ExecuteNonQueryAsync();
                 }
 
@@ -277,9 +278,31 @@ namespace PharmacyClient.ViewModels
                 await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                 await connection.OpenAsync();
 
-                var sql = $"ALTER USER [{SelectedUser.LoginName}] WITH PASSWORD = '{NewPassword}';";
-                await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(sql, connection);
-                await cmd.ExecuteNonQueryAsync();
+                // Сбрасываем пароль через хранимую процедуру или ALTER LOGIN
+                // Сначала получаем имя логина на уровне сервера
+                var getLoginSql = "SELECT name FROM sys.server_principals WHERE name = @LoginName";
+                string loginExists = null;
+                
+                await using (var getCmd = new Microsoft.Data.SqlClient.SqlCommand(getLoginSql, connection))
+                {
+                    getCmd.Parameters.AddWithValue("@LoginName", SelectedUser.LoginName);
+                    loginExists = await getCmd.ExecuteScalarAsync() as string;
+                }
+
+                if (!string.IsNullOrEmpty(loginExists))
+                {
+                    // Логин существует на уровне сервера, меняем пароль через ALTER LOGIN
+                    var resetPasswordSql = $"ALTER LOGIN [{SelectedUser.LoginName}] WITH PASSWORD = '{NewPassword}'";
+                    await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(resetPasswordSql, connection);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+                else
+                {
+                    // Логина нет, пробуем через ALTER USER (для пользователей без логина)
+                    var resetPasswordSql = $"ALTER USER [{SelectedUser.LoginName}] WITH PASSWORD = '{NewPassword}'";
+                    await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(resetPasswordSql, connection);
+                    await cmd.ExecuteNonQueryAsync();
+                }
 
                 StatusMessage = $"Пароль для '{SelectedUser.LoginName}' сброшен";
                 MessageBox.Show($"Пароль успешно сброшен!\\n\\nНовый пароль: {NewPassword}",
@@ -315,16 +338,19 @@ namespace PharmacyClient.ViewModels
                 await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                 await connection.OpenAsync();
 
-                // Обновляем роль пользователя
-                var updateRoleSql = $@"
-                    -- Удаляем из текущей роли
-                    EXEC sp_droprolemember '{SelectedRole}', '{user.LoginName}';
+                // Обновляем роль пользователя через хранимую процедуру sp_CreateDatabaseUser
+                // Это гарантирует корректное управление ролями
+                await using (var updateCmd = new Microsoft.Data.SqlClient.SqlCommand("dbo.sp_CreateDatabaseUser", connection))
+                {
+                    updateCmd.CommandType = System.Data.CommandType.StoredProcedure;
                     
-                    -- Добавляем в новую роль
-                    EXEC sp_addrolemember '{user.RoleName}', '{user.LoginName}';";
-
-                await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(updateRoleSql, connection);
-                await cmd.ExecuteNonQueryAsync();
+                    // Передаем существующего пользователя для обновления роли
+                    updateCmd.Parameters.AddWithValue("@LoginName", user.LoginName);
+                    updateCmd.Parameters.AddWithValue("@Password", "unchanged"); // Пароль не меняется
+                    updateCmd.Parameters.AddWithValue("@RoleName", user.RoleName);
+                    
+                    await updateCmd.ExecuteNonQueryAsync();
+                }
 
                 StatusMessage = $"Пользователь '{user.LoginName}' обновлен";
             }
