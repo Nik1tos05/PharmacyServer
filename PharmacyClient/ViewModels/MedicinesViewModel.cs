@@ -10,8 +10,6 @@ namespace PharmacyClient.ViewModels
 {
     public partial class MedicinesViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
-
         [ObservableProperty]
         private ObservableCollection<Medicine> _medicines = new();
 
@@ -41,7 +39,6 @@ namespace PharmacyClient.ViewModels
 
         public MedicinesViewModel()
         {
-            _context = new PharmacyDbContext();
             Categories.Add("Все");
         }
 
@@ -53,10 +50,14 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 StatusMessage = "Загрузка данных...";
 
-                var query = _context.Medicines
+                // Создаем новый контекст для каждой операции
+                await using var context = new PharmacyDbContext();
+                
+                var query = context.Medicines
                     .Include(m => m.Category)
                     .Include(m => m.MedicineType)
                     .Include(m => m.Unit)
+                    .AsNoTracking()
                     .AsQueryable();
 
                 // Применяем поиск
@@ -105,7 +106,8 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
-                var categories = await _context.MedicineCategories
+                await using var context = new PharmacyDbContext();
+                var categories = await context.MedicineCategories
                     .Where(c => c.CategoryName != null)
                     .Select(c => c.CategoryName!)
                     .Distinct()
@@ -129,11 +131,12 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
+                await using var context = new PharmacyDbContext();
                 MedicineTypes = new ObservableCollection<MedicineType>(
-                    await _context.MedicineTypes.ToListAsync());
+                    await context.MedicineTypes.AsNoTracking().ToListAsync());
                 
                 UnitsOfMeasure = new ObservableCollection<UnitsOfMeasure>(
-                    await _context.UnitsOfMeasures.ToListAsync());
+                    await context.UnitsOfMeasures.AsNoTracking().ToListAsync());
             }
             catch
             {
@@ -200,8 +203,13 @@ namespace PharmacyClient.ViewModels
 
             try
             {
-                _context.Medicines.Remove(SelectedMedicine);
-                await _context.SaveChangesAsync();
+                await using var context = new PharmacyDbContext();
+                var medicineToDelete = await context.Medicines.FindAsync(SelectedMedicine.MedicineId);
+                if (medicineToDelete != null)
+                {
+                    context.Medicines.Remove(medicineToDelete);
+                    await context.SaveChangesAsync();
+                }
 
                 StatusMessage = "Лекарство удалено";
                 SelectedMedicine = null;

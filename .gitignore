@@ -1,65 +1,35 @@
-# Compiled and build artifacts
-*.o
-*.obj
-*.exe
+```
+# Build artifacts
+bin/
+obj/
 *.dll
-*.so
-*.a
-*.out
+*.exe
+*.pdb
+*.userprefs
 
 # Dependencies
+packages/
 node_modules/
-venv/
-.venv/
-__pycache__/
-dist/
-build/
-target/
-.gradle/
+bower_components/
 
-# Logs and temp files
+# Logs
 *.log
-*.tmp
-*.swp
 
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Common compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code files
+.vscode/
+
+# Temporary files
+*.tmp
+*.temp
+```

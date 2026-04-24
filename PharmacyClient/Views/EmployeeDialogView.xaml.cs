@@ -29,7 +29,6 @@ namespace PharmacyClient.Views
 
     public partial class EmployeeDialogViewModel : ObservableValidator, IDisposable
     {
-        private readonly PharmacyClient.Data.PharmacyDbContext _context;
         private readonly SqlServerUserManagementService _userService;
         private readonly Employee? _originalEmployee;
         
@@ -88,7 +87,6 @@ namespace PharmacyClient.Views
 
         public EmployeeDialogViewModel(Employee? employee = null, ObservableCollection<string>? departments = null)
         {
-            _context = new PharmacyClient.Data.PharmacyDbContext();
             var connectionString = App.CurrentUserSession?.ConnectionString ?? 
                                    "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
             _userService = new SqlServerUserManagementService(connectionString);
@@ -136,7 +134,8 @@ namespace PharmacyClient.Views
         {
             try
             {
-                var depts = _context.Employees
+                using var context = new PharmacyDbContext();
+                var depts = context.Employees.AsNoTracking()
                     .Where(e => e.Department != null)
                     .Select(e => e.Department!)
                     .Distinct()
@@ -196,41 +195,47 @@ namespace PharmacyClient.Views
                 if (IsEditMode && _originalEmployee != null)
                 {
                     // Редактирование
-                    _originalEmployee.LastName = LastName;
-                    _originalEmployee.FirstName = FirstName;
-                    _originalEmployee.Patronymic = Patronymic;
-                    _originalEmployee.Position = Position;
-                    _originalEmployee.Department = Department;
-                    _originalEmployee.HireDate = HireDate;
-                    _originalEmployee.Phone = Phone;
-                    _originalEmployee.Email = Email;
-                    _originalEmployee.PassportSeries = PassportSeries;
-                    _originalEmployee.PassportNumber = PassportNumber;
-                    _originalEmployee.Salary = Salary;
-                    _originalEmployee.IsManager = IsManager;
-                    _originalEmployee.CanSignDocuments = CanSignDocuments;
-                    _originalEmployee.IsActive = IsActive;
-                    _originalEmployee.ModifiedDate = DateTime.Now;
-
-                    await _context.SaveChangesAsync();
-
-                    // Обновляем роль в SQL Server
-                    try
+                    await using var context = new PharmacyDbContext();
+                    var employeeToUpdate = await context.Employees.FindAsync(_originalEmployee.EmployeeId);
+                    if (employeeToUpdate != null)
                     {
-                        await _userService.UpdateUserRoleAsync(_originalEmployee);
-                    }
-                    catch (Exception sqlEx)
-                    {
-                        MessageBox.Show($"Не удалось обновить роль в SQL Server: {sqlEx.Message}", 
-                            "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
+                        employeeToUpdate.LastName = LastName;
+                        employeeToUpdate.FirstName = FirstName;
+                        employeeToUpdate.Patronymic = Patronymic;
+                        employeeToUpdate.Position = Position;
+                        employeeToUpdate.Department = Department;
+                        employeeToUpdate.HireDate = HireDate;
+                        employeeToUpdate.Phone = Phone;
+                        employeeToUpdate.Email = Email;
+                        employeeToUpdate.PassportSeries = PassportSeries;
+                        employeeToUpdate.PassportNumber = PassportNumber;
+                        employeeToUpdate.Salary = Salary;
+                        employeeToUpdate.IsManager = IsManager;
+                        employeeToUpdate.CanSignDocuments = CanSignDocuments;
+                        employeeToUpdate.IsActive = IsActive;
+                        employeeToUpdate.ModifiedDate = DateTime.Now;
 
-                    MessageBox.Show("Сотрудник успешно обновлен!", "Редактирование", 
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                        await context.SaveChangesAsync();
+
+                        // Обновляем роль в SQL Server
+                        try
+                        {
+                            await _userService.UpdateUserRoleAsync(employeeToUpdate);
+                        }
+                        catch (Exception sqlEx)
+                        {
+                            MessageBox.Show($"Не удалось обновить роль в SQL Server: {sqlEx.Message}", 
+                                "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+
+                        MessageBox.Show("Сотрудник успешно обновлен!", "Редактирование", 
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
                 else
                 {
                     // Добавление нового сотрудника
+                    await using var context = new PharmacyDbContext();
                     var newEmployee = new Employee
                     {
                         LastName = LastName,
@@ -251,8 +256,8 @@ namespace PharmacyClient.Views
                         ModifiedDate = DateTime.Now
                     };
 
-                    _context.Employees.Add(newEmployee);
-                    await _context.SaveChangesAsync();
+                    context.Employees.Add(newEmployee);
+                    await context.SaveChangesAsync();
 
                     // Автоматически создаем учетную запись SQL Server
                     try
@@ -294,7 +299,7 @@ namespace PharmacyClient.Views
 
         public void Dispose()
         {
-            _context.Dispose();
+            // Контекст больше не хранится как поле, поэтому ничего не нужно disposing
         }
     }
 }

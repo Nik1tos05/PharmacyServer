@@ -10,8 +10,6 @@ namespace PharmacyClient.ViewModels
 {
     public partial class ComponentsViewModel : ObservableObject
     {
-        private readonly PharmacyDbContext _context;
-
         [ObservableProperty]
         private ObservableCollection<Component> _components = new();
 
@@ -38,7 +36,6 @@ namespace PharmacyClient.ViewModels
 
         public ComponentsViewModel()
         {
-            _context = new PharmacyDbContext();
             Categories.Add("Все");
         }
 
@@ -50,9 +47,11 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 StatusMessage = "Загрузка данных...";
 
-                var query = _context.Components
+                await using var context = new PharmacyDbContext();
+                var query = context.Components
                     .Include(c => c.Category)
                     .Include(c => c.Unit)
+                    .AsNoTracking()
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(SearchText))
@@ -96,7 +95,8 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
-                var categories = await _context.MedicineCategories
+                await using var context = new PharmacyDbContext();
+                var categories = await context.MedicineCategories
                     .Where(c => c.CategoryName != null)
                     .Select(c => c.CategoryName!)
                     .Distinct()
@@ -120,8 +120,9 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
+                await using var context = new PharmacyDbContext();
                 UnitsOfMeasure = new ObservableCollection<UnitsOfMeasure>(
-                    await _context.UnitsOfMeasures.ToListAsync());
+                    await context.UnitsOfMeasures.AsNoTracking().ToListAsync());
             }
             catch
             {
