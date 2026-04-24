@@ -121,6 +121,20 @@
                               Margin="5,0,0,0"/>
                 </Grid>
 
+                <!-- Специальный блок для запросов 11 и 13: выбор лекарства -->
+                <Grid Visibility="{Binding MedicineSelectionRequired, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Выберите лекарство:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#D32F2F"/>
+                    <ComboBox Grid.Column="1" 
+                              ItemsSource="{Binding Medicines}"
+                              SelectedItem="{Binding SelectedMedicine}"
+                              DisplayMemberPath="MedicineName"
+                              Margin="5,0,0,0"/>
+                </Grid>
+
                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
                     <Button Content="Применить параметры" 
                             Command="{Binding ApplyParametersCommand}"
