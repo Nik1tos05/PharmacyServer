@@ -104,32 +104,11 @@
                     <ComboBox Grid.Column="1" 
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
-                              Margin="5,0,0,0">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding MedicineName}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                              DisplayMemberPath="MedicineName"
+                              Margin="5,0,0,0"/>
                 </Grid>
 
-                <Grid Visibility="{Binding MedicineSelectionRequired, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Выберите лекарство:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#D32F2F"/>
-                    <ComboBox Grid.Column="1" 
-                              ItemsSource="{Binding Medicines}"
-                              SelectedItem="{Binding SelectedMedicine}"
-                              Margin="5,0,0,0">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding MedicineName}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </Grid>
+                <!-- Этот блок больше не нужен, так как для запросов 11 и 13 используется DataGrid в окне результатов -->
 
                 <Grid Visibility="{Binding ShowMedicineTypeParameter, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
                     <Grid.ColumnDefinitions>
@@ -161,6 +140,7 @@
                 CornerRadius="5"
                 Margin="0,0,0,10">
             <Grid>
+                <!-- DataGrid для результатов запроса -->
                 <DataGrid x:Name="ResultsGrid"
                           ItemsSource="{Binding QueryResults}"
                           AutoGenerateColumns="True"
@@ -171,7 +151,31 @@
                           AlternatingRowBackground="#F5F5F5"
                           HeadersVisibility="Column"
                           SelectionMode="Single"
-                          ColumnWidth="SizeToCells"/>
+                          ColumnWidth="SizeToCells"
+                          Visibility="{Binding ShowMedicineListForQuery, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Inverse}"/>
+
+                <!-- Список лекарств для выбора (для запросов 11 и 13) -->
+                <DataGrid x:Name="MedicineSelectionGrid"
+                          ItemsSource="{Binding Medicines}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="False"
+                          GridLinesVisibility="All"
+                          AlternatingRowBackground="#F5F5F5"
+                          HeadersVisibility="Column"
+                          SelectionMode="Single"
+                          ColumnWidth="SizeToCells"
+                          Visibility="{Binding ShowMedicineListForQuery, Converter={StaticResource BoolToVisibilityConverter}}"
+                          SelectedItem="{Binding SelectedMedicine, Mode=TwoWay}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding MedicineId}" Width="50"/>
+                        <DataGridTextColumn Header="Название" Binding="{Binding MedicineName}" Width="200"/>
+                        <DataGridTextColumn Header="Категория" Binding="{Binding Category.CategoryName}" Width="150"/>
+                        <DataGridTextColumn Header="Тип" Binding="{Binding MedicineType.TypeName}" Width="150"/>
+                        <DataGridTextColumn Header="Цена" Binding="{Binding SalePrice, StringFormat=F2}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
                 <!-- Индикатор загрузки -->
                 <Border Background="#80FFFFFF"
