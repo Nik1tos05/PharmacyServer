@@ -121,7 +121,7 @@ public class PharmacyQueriesService
                           && (order.OrderStatus == "Выполнен" || order.OrderStatus == "Выдан")
                     join medicineComposition in _context.MedicineCompositions on order.MedicineId equals medicineComposition.MedicineId
                     join component in _context.Components on medicineComposition.ComponentId equals component.ComponentId
-                    join unit in _context.UnitsOfMeasure on component.UnitId equals unit.UnitId into unitJoin
+                    join unit in _context.UnitsOfMeasures on component.UnitId equals unit.UnitId into unitJoin
                     from unit in unitJoin.DefaultIfEmpty()
                     where componentIds == null || componentIds.Contains(component.ComponentId)
                     group new { CompQuantity = medicineComposition.Quantity, OrderQuantity = order.Quantity, UnitName = unit != null ? unit.UnitName : "Не указана" } by new 
