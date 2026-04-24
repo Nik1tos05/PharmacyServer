@@ -8,26 +8,21 @@ namespace PharmacyClient.Services
 {
     /// <summary>
     /// Сервис для автоматического управления учетными записями SQL Server для сотрудников
+    /// Использует хранимую процедуру sp_CreateDatabaseUser для обхода ограничений прав
     /// </summary>
     public class SqlServerUserManagementService
     {
-        private readonly string _masterConnectionString;
+        private readonly string _connectionString;
         private readonly string _databaseName;
 
         public SqlServerUserManagementService(string databaseConnectionString, string databaseName = "PharmacyDB")
         {
             _databaseName = databaseName;
-            
-            // Извлекаем строку подключения к master для создания логинов
-            var builder = new SqlConnectionStringBuilder(databaseConnectionString)
-            {
-                InitialCatalog = "master"
-            };
-            _masterConnectionString = builder.ConnectionString;
+            _connectionString = databaseConnectionString;
         }
 
         /// <summary>
-        /// Создает логин и пользователя SQL Server для нового сотрудника
+        /// Создает логин и пользователя SQL Server для нового сотрудника через хранимую процедуру
         /// </summary>
         public async Task CreateUserAsync(PharmacyClient.Models.Employee employee, string password = "12345678")
         {
@@ -37,66 +32,42 @@ namespace PharmacyClient.Services
             var loginName = Transliterate(employee.LastName);
             var roleName = GetRoleForPosition(employee.Position);
 
-            using (var connection = new SqlConnection(_masterConnectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
 
-                // 1. Создаем LOGIN на уровне сервера (если не существует)
-                var checkLoginSql = $"SELECT COUNT(*) FROM sys.server_principals WHERE name = @LoginName";
-                using (var checkCmd = new SqlCommand(checkLoginSql, connection))
-                {
-                    checkCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    var exists = (int)await checkCmd.ExecuteScalarAsync();
+                // Используем хранимую процедуру sp_CreateDatabaseUser для создания пользователя
+                // Процедура выполняется с правами EXECUTE AS OWNER, поэтому не требует прав ALTER ANY LOGIN
+                var createSql = @"
+                    IF OBJECT_ID('master.dbo.sp_CreateDatabaseUser', 'P') IS NOT NULL
+                    BEGIN
+                        EXEC master.dbo.sp_CreateDatabaseUser 
+                            @LoginName = @LoginName,
+                            @Password = @Password,
+                            @RoleName = @RoleName,
+                            @DatabaseName = @DatabaseName;
+                    END
+                    ELSE
+                    BEGIN
+                        RAISERROR('Хранимая процедура sp_CreateDatabaseUser не найдена в базе master. Обратитесь к администратору БД.', 16, 1);
+                    END";
 
-                    if (exists == 0)
+                using (var cmd = new SqlCommand(createSql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@LoginName", loginName);
+                    cmd.Parameters.AddWithValue("@Password", password);
+                    cmd.Parameters.AddWithValue("@RoleName", roleName);
+                    cmd.Parameters.AddWithValue("@DatabaseName", _databaseName);
+
+                    try
                     {
-                        var createLoginSql = $@"
-                            CREATE LOGIN [{loginName}] 
-                            WITH PASSWORD = '{password}', 
-                            CHECK_POLICY = OFF, 
-                            DEFAULT_DATABASE = [{_databaseName}]";
-                        
-                        using (var createCmd = new SqlCommand(createLoginSql, connection))
-                        {
-                            await createCmd.ExecuteNonQueryAsync();
-                        }
+                        await cmd.ExecuteNonQueryAsync();
                     }
-                    else
+                    catch (SqlException ex)
                     {
-                        // Обновляем пароль и БД по умолчанию
-                        var updateLoginSql = $@"
-                            ALTER LOGIN [{loginName}] 
-                            WITH PASSWORD = '{password}', 
-                            DEFAULT_DATABASE = [{_databaseName}]";
-                        
-                        using (var updateCmd = new SqlCommand(updateLoginSql, connection))
-                        {
-                            await updateCmd.ExecuteNonQueryAsync();
-                        }
+                        throw new Exception($"Ошибка создания пользователя через хранимую процедуру: {ex.Message}", ex);
                     }
                 }
-
-                // 2. Переключаемся на базу данных и создаем USER
-                connection.ChangeDatabase(_databaseName);
-
-                var checkUserSql = $"SELECT COUNT(*) FROM sys.database_principals WHERE name = @LoginName";
-                using (var checkCmd = new SqlCommand(checkUserSql, connection))
-                {
-                    checkCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    var exists = (int)await checkCmd.ExecuteScalarAsync();
-
-                    if (exists == 0)
-                    {
-                        var createUserSql = $"CREATE USER [{loginName}] FOR LOGIN [{loginName}]";
-                        using (var createCmd = new SqlCommand(createUserSql, connection))
-                        {
-                            await createCmd.ExecuteNonQueryAsync();
-                        }
-                    }
-                }
-
-                // 3. Назначаем роль
-                await AssignRoleAsync(connection, loginName, roleName);
             }
         }
 
@@ -110,69 +81,59 @@ namespace PharmacyClient.Services
 
             var loginName = Transliterate(employee.LastName);
 
-            using (var connection = new SqlConnection(_masterConnectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
 
-                // Проверяем существование логина
-                var checkLoginSql = $"SELECT COUNT(*) FROM sys.server_principals WHERE name = @LoginName";
-                using (var checkCmd = new SqlCommand(checkLoginSql, connection))
-                {
-                    checkCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    var exists = (int)await checkCmd.ExecuteScalarAsync();
-
-                    if (exists == 0)
-                        return; // Логина нет, ничего не делаем
-                }
-
-                // Переключаемся на базу данных
-                connection.ChangeDatabase(_databaseName);
-
-                // 1. Удаляем из всех ролей
-                var getRolesSql = @"
-                    SELECT r.name 
-                    FROM sys.database_role_members rm
+                // Переключаемся на базу данных для удаления из ролей и пользователя
+                var deleteSql = $@"
+                    USE [{_databaseName}];
+                    
+                    -- 1. Удаляем из всех ролей
+                    DECLARE @oldRole SYSNAME;
+                    DECLARE role_cursor CURSOR LOCAL FAST_FORWARD FOR
+                    SELECT r.name FROM sys.database_role_members rm
                     JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
                     JOIN sys.database_principals m ON rm.member_principal_id = m.principal_id
-                    WHERE m.name = @LoginName";
+                    WHERE m.name = @LoginName;
 
-                using (var getRolesCmd = new SqlCommand(getRolesSql, connection))
+                    OPEN role_cursor;
+                    FETCH NEXT FROM role_cursor INTO @oldRole;
+                    WHILE @@FETCH_STATUS = 0
+                    BEGIN
+                        EXEC('ALTER ROLE [' + @oldRole + '] DROP MEMBER [{loginName}]');
+                        FETCH NEXT FROM role_cursor INTO @oldRole;
+                    END
+                    CLOSE role_cursor;
+                    DEALLOCATE role_cursor;
+
+                    -- 2. Удаляем пользователя БД
+                    IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @LoginName)
+                        DROP USER [{loginName}];
+                    
+                    -- 3. Возвращаемся к master и удаляем логин
+                    USE master;
+                    IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = @LoginName)
+                        DROP LOGIN [{loginName}];
+                ";
+
+                using (var cmd = new SqlCommand(deleteSql, connection))
                 {
-                    getRolesCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    using (var reader = await getRolesCmd.ExecuteReaderAsync())
+                    cmd.Parameters.AddWithValue("@LoginName", loginName);
+                    try
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var roleName = reader.GetString(0);
-                            var dropFromRoleSql = $"ALTER ROLE [{roleName}] DROP MEMBER [{loginName}]";
-                            using (var dropCmd = new SqlCommand(dropFromRoleSql, connection))
-                            {
-                                await dropCmd.ExecuteNonQueryAsync();
-                            }
-                        }
+                        await cmd.ExecuteNonQueryAsync();
                     }
-                }
-
-                // 2. Удаляем пользователя БД
-                var dropUserSql = $"IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @LoginName) DROP USER [{loginName}]";
-                using (var dropUserCmd = new SqlCommand(dropUserSql, connection))
-                {
-                    dropUserCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    await dropUserCmd.ExecuteNonQueryAsync();
-                }
-
-                // 3. Возвращаемся к master и удаляем логин
-                connection.ChangeDatabase("master");
-                var dropLoginSql = $"DROP LOGIN [{loginName}]";
-                using (var dropLoginCmd = new SqlCommand(dropLoginSql, connection))
-                {
-                    await dropLoginCmd.ExecuteNonQueryAsync();
+                    catch (SqlException ex)
+                    {
+                        throw new Exception($"Ошибка удаления пользователя: {ex.Message}", ex);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// Обновляет роль пользователя при изменении должности сотрудника
+        /// Обновляет роль пользователя при изменении должности сотрудника через хранимую процедуру
         /// </summary>
         public async Task UpdateUserRoleAsync(PharmacyClient.Models.Employee employee)
         {
@@ -182,47 +143,45 @@ namespace PharmacyClient.Services
             var loginName = Transliterate(employee.LastName);
             var newRoleName = GetRoleForPosition(employee.Position);
 
-            using (var connection = new SqlConnection(_masterConnectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                connection.ChangeDatabase(_databaseName);
 
-                // Получаем текущие роли пользователя
-                var getCurrentRolesSql = @"
-                    SELECT r.name 
-                    FROM sys.database_role_members rm
-                    JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
-                    JOIN sys.database_principals m ON rm.member_principal_id = m.principal_id
-                    WHERE m.name = @LoginName";
+                // Используем хранимую процедуру с паролем 'unchanged' для обновления только роли
+                var updateSql = @"
+                    IF OBJECT_ID('master.dbo.sp_CreateDatabaseUser', 'P') IS NOT NULL
+                    BEGIN
+                        EXEC master.dbo.sp_CreateDatabaseUser 
+                            @LoginName = @LoginName,
+                            @Password = 'unchanged',
+                            @RoleName = @RoleName,
+                            @DatabaseName = @DatabaseName;
+                    END
+                    ELSE
+                    BEGIN
+                        RAISERROR('Хранимая процедура sp_CreateDatabaseUser не найдена в базе master.', 16, 1);
+                    END";
 
-                using (var getCmd = new SqlCommand(getCurrentRolesSql, connection))
+                using (var cmd = new SqlCommand(updateSql, connection))
                 {
-                    getCmd.Parameters.AddWithValue("@LoginName", loginName);
-                    using (var reader = await getCmd.ExecuteReaderAsync())
+                    cmd.Parameters.AddWithValue("@LoginName", loginName);
+                    cmd.Parameters.AddWithValue("@RoleName", newRoleName);
+                    cmd.Parameters.AddWithValue("@DatabaseName", _databaseName);
+
+                    try
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var currentRole = reader.GetString(0);
-                            if (currentRole != newRoleName)
-                            {
-                                // Удаляем из старой роли
-                                var dropSql = $"ALTER ROLE [{currentRole}] DROP MEMBER [{loginName}]";
-                                using (var dropCmd = new SqlCommand(dropSql, connection))
-                                {
-                                    await dropCmd.ExecuteNonQueryAsync();
-                                }
-                            }
-                        }
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new Exception($"Ошибка обновления роли пользователя: {ex.Message}", ex);
                     }
                 }
-
-                // Добавляем в новую роль
-                await AssignRoleAsync(connection, loginName, newRoleName);
             }
         }
 
         /// <summary>
-        /// Сбрасывает пароль пользователя
+        /// Сбрасывает пароль пользователя через хранимую процедуру
         /// </summary>
         public async Task ResetPasswordAsync(PharmacyClient.Models.Employee employee, string newPassword = "12345678")
         {
@@ -231,17 +190,39 @@ namespace PharmacyClient.Services
 
             var loginName = Transliterate(employee.LastName);
 
-            using (var connection = new SqlConnection(_masterConnectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
 
-                var resetPasswordSql = $@"
-                    ALTER LOGIN [{loginName}] 
-                    WITH PASSWORD = '{newPassword}'";
+                // Используем хранимую процедуру для сброса пароля
+                var resetSql = @"
+                    IF OBJECT_ID('master.dbo.sp_CreateDatabaseUser', 'P') IS NOT NULL
+                    BEGIN
+                        EXEC master.dbo.sp_CreateDatabaseUser 
+                            @LoginName = @LoginName,
+                            @Password = @Password,
+                            @RoleName = 'unchanged',
+                            @DatabaseName = @DatabaseName;
+                    END
+                    ELSE
+                    BEGIN
+                        RAISERROR('Хранимая процедура sp_CreateDatabaseUser не найдена в базе master.', 16, 1);
+                    END";
 
-                using (var cmd = new SqlCommand(resetPasswordSql, connection))
+                using (var cmd = new SqlCommand(resetSql, connection))
                 {
-                    await cmd.ExecuteNonQueryAsync();
+                    cmd.Parameters.AddWithValue("@LoginName", loginName);
+                    cmd.Parameters.AddWithValue("@Password", newPassword);
+                    cmd.Parameters.AddWithValue("@DatabaseName", _databaseName);
+
+                    try
+                    {
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new Exception($"Ошибка сброса пароля: {ex.Message}", ex);
+                    }
                 }
             }
         }

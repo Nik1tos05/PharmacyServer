@@ -29,8 +29,6 @@
                     Padding="10,5" Margin="0,0,5,0"/>
             <Button Content="Добавить" Command="{Binding AddTechnologyCommand}" 
                     Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="Редактировать" Command="{Binding EditTechnologyCommand}" 
-                    Padding="10,5" Margin="0,0,5,0"/>
             <Button Content="Удалить" Command="{Binding DeleteTechnologyCommand}" 
                     Padding="10,5"/>
         </StackPanel>
