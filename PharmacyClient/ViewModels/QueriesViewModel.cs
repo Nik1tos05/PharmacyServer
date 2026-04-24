@@ -31,6 +31,7 @@ namespace PharmacyClient.ViewModels
         private bool _showMedicineParameter;
         private bool _showMedicineTypeParameter;
         private bool _medicineSelectionRequired;
+        private bool _showMedicineListForQuery;
 
         private MedicineCategory? _selectedCategory;
         private DateTime? _startDate;
@@ -157,6 +158,12 @@ namespace PharmacyClient.ViewModels
             set => SetField(ref _medicineSelectionRequired, value);
         }
 
+        public bool ShowMedicineListForQuery
+        {
+            get => _showMedicineListForQuery;
+            set => SetField(ref _showMedicineListForQuery, value);
+        }
+
         public ObservableCollection<MedicineCategory> Categories { get; }
 
         public MedicineCategory? SelectedCategory
@@ -170,7 +177,18 @@ namespace PharmacyClient.ViewModels
         public Medicine? SelectedMedicine
         {
             get => _selectedMedicine;
-            set => SetField(ref _selectedMedicine, value);
+            set 
+            { 
+                if (SetField(ref _selectedMedicine, value))
+                {
+                    // Если лекарство выбрано в DataGrid для запросов 11 и 13, скрываем список и выполняем запрос
+                    if (ShowMedicineListForQuery && value != null)
+                    {
+                        ShowMedicineListForQuery = false;
+                        ExecuteQuery();
+                    }
+                }
+            }
         }
 
         public ObservableCollection<MedicineType> MedicineTypes { get; }
@@ -234,6 +252,7 @@ namespace PharmacyClient.ViewModels
             {
                 ShowParameters = false;
                 MedicineSelectionRequired = false;
+                ShowMedicineListForQuery = false;
                 return;
             }
 
@@ -243,13 +262,16 @@ namespace PharmacyClient.ViewModels
             ShowMedicineParameter = (SelectedQuery.ParameterType & QueryParameterType.Medicine) == QueryParameterType.Medicine;
             ShowMedicineTypeParameter = (SelectedQuery.ParameterType & QueryParameterType.MedicineType) == QueryParameterType.MedicineType;
 
-            // Для запросов 11 и 13 требуется выбор лекарства - всегда показываем параметр лекарства
+            // Для запросов 11 и 13 требуется выбор лекарства - показываем реестр лекарств в окне результатов
             MedicineSelectionRequired = SelectedQuery.Id == 11 || SelectedQuery.Id == 13;
             
-            // Для запросов 11 и 13 всегда показываем ComboBox с лекарствами
+            // Для запросов 11 и 13 показываем список лекарств для выбора в окне результатов
+            ShowMedicineListForQuery = MedicineSelectionRequired;
+            
+            // Для запросов 11 и 13 скрываем обычный параметр лекарства, так как показываем расширенный список
             if (MedicineSelectionRequired)
             {
-                ShowMedicineParameter = true;
+                ShowMedicineParameter = false;
             }
 
             // Устанавливаем значения по умолчанию для дат
@@ -404,19 +426,18 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery11()
         {
-            // Если лекарство не выбрано, загружаем список и просим выбрать
+            // Если лекарство не выбрано, показываем список лекарств в окне результатов для выбора
             if (SelectedMedicine == null)
             {
-                // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
+                // Загружаем все лекарства, если еще не загружены
                 if (Medicines.Count == 0)
                 {
                     LoadReferenceData();
                 }
                 
-                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
-                MessageBox.Show("Выберите лекарство из списка и нажмите 'Выполнить'", 
-                    "Требуется выбор лекарства", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                // Показываем список лекарств в окне результатов
+                QueryResults = Medicines.ToList();
+                StatusMessage = "Выберите лекарство из списка выше и нажмите 'Выполнить' снова";
                 return null;
             }
             
@@ -443,19 +464,18 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery13()
         {
-            // Если лекарство не выбрано, загружаем список и просим выбрать
+            // Если лекарство не выбрано, показываем список лекарств в окне результатов для выбора
             if (SelectedMedicine == null)
             {
-                // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
+                // Загружаем все лекарства, если еще не загружены
                 if (Medicines.Count == 0)
                 {
                     LoadReferenceData();
                 }
                 
-                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
-                MessageBox.Show("Выберите лекарство из списка и нажмите 'Выполнить'", 
-                    "Требуется выбор лекарства", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                // Показываем список лекарств в окне результатов
+                QueryResults = Medicines.ToList();
+                StatusMessage = "Выберите лекарство из списка выше и нажмите 'Выполнить' снова";
                 return null;
             }
             
