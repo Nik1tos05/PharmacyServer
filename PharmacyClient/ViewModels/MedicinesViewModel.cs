@@ -166,8 +166,45 @@ namespace PharmacyClient.ViewModels
         [RelayCommand]
         private async Task AddMedicineAsync()
         {
-            MessageBox.Show("Функция добавления лекарства будет реализована в диалоговом окне", "Информация",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                
+                // Получаем первый доступный тип и единицу измерения
+                var firstType = await context.MedicineTypes.FirstOrDefaultAsync();
+                var firstUnit = await context.UnitsOfMeasures.FirstOrDefaultAsync();
+                
+                if (firstType == null || firstUnit == null)
+                {
+                    MessageBox.Show("Необходимо сначала создать типы лекарств и единицы измерения", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var newMedicine = new Medicine
+                {
+                    MedicineName = "Новое лекарство",
+                    MedicineTypeId = firstType.MedicineTypeId,
+                    UnitId = firstUnit.UnitId,
+                    CriticalNorm = 10,
+                    SalePrice = 0,
+                    RequiresPrescription = false,
+                    IsReadyMade = true,
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+
+                context.Medicines.Add(newMedicine);
+                await context.SaveChangesAsync();
+
+                StatusMessage = "Лекарство добавлено";
+                await LoadMedicinesAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand]
@@ -180,7 +217,7 @@ namespace PharmacyClient.ViewModels
                 return;
             }
 
-            MessageBox.Show($"Редактирование лекарства: {SelectedMedicine.MedicineName}", "Информация",
+            MessageBox.Show("Для редактирования нажмите на ячейку таблицы и измените значение", "Информация",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

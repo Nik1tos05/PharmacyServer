@@ -136,7 +136,7 @@ namespace PharmacyClient.Views
             try
             {
                 using var context = new PharmacyDbContext();
-                var depts = context.Employees.AsNoTracking()
+                var depts = context.Employees
                     .Where(e => e.Department != null)
                     .Select(e => e.Department!)
                     .Distinct()

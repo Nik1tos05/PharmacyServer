@@ -124,20 +124,20 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      IsReadOnly="True"
+                      IsReadOnly="False"
                       GridLinesVisibility="Horizontal"
                       AlternatingRowBackground="#F5F5F5"
                       HeadersVisibility="Column"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      BeginningEdit="DataGrid_BeginningEdit"
+                      RowEditEnding="DataGrid_RowEditEnding">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" Width="200"/>
-                    <DataGridTextColumn Header="Поставщик" Binding="{Binding Supplier}" Width="150"/>
-                    <DataGridTextColumn Header="Категория" Binding="{Binding Category.CategoryName}" Width="120"/>
-                    <DataGridTextColumn Header="Ед.изм." Binding="{Binding Unit.UnitName}" Width="80"/>
-                    <DataGridTextColumn Header="Крит.норма" Binding="{Binding CriticalNorm, StringFormat={}{0:F3}}" Width="80"/>
-                    <DataGridTextColumn Header="Тек.запас" Binding="{Binding CurrentStock, StringFormat={}{0:F3}}" Width="80"/>
-                    <DataGridTextColumn Header="Цена закупки" Binding="{Binding PurchasePrice, StringFormat={}{0:F2}}" Width="90"/>
-                    <DataGridTextColumn Header="Условия хранения" Binding="{Binding StorageConditions}" Width="150"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                    <DataGridTextColumn Header="Поставщик" Binding="{Binding Supplier, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+                    <DataGridTextColumn Header="Крит.норма" Binding="{Binding CriticalNorm, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F3}}" Width="80"/>
+                    <DataGridTextColumn Header="Тек.запас" Binding="{Binding CurrentStock, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F3}}" Width="80"/>
+                    <DataGridTextColumn Header="Цена закупки" Binding="{Binding PurchasePrice, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F2}}" Width="90"/>
+                    <DataGridTextColumn Header="Условия хранения" Binding="{Binding StorageConditions, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

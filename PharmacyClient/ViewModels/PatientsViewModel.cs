@@ -85,6 +85,90 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
+        private async Task AddPatientAsync()
+        {
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                var newPatient = new Patient
+                {
+                    LastName = "Новый",
+                    FirstName = "Пациент",
+                    RegistrationDate = DateTime.Now,
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+
+                context.Patients.Add(newPatient);
+                await context.SaveChangesAsync();
+
+                StatusMessage = "Пациент добавлен";
+                await LoadPatientsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditPatientAsync()
+        {
+            if (SelectedPatient == null)
+            {
+                MessageBox.Show("Выберите пациента для редактирования", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Редактирование через inline в DataGrid
+            MessageBox.Show("Для редактирования нажмите на ячейку таблицы и измените значение", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private async Task DeletePatientAsync()
+        {
+            if (SelectedPatient == null)
+            {
+                MessageBox.Show("Выберите пациента для удаления", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Вы действительно хотите удалить пациента {SelectedPatient.FullName}?",
+                "Удаление пациента", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                var patientToDelete = await context.Patients.FindAsync(SelectedPatient.PatientId);
+                if (patientToDelete != null)
+                {
+                    context.Patients.Remove(patientToDelete);
+                    await context.SaveChangesAsync();
+                }
+
+                StatusMessage = "Пациент удален";
+                SelectedPatient = null;
+                await LoadPatientsAsync();
+                
+                MessageBox.Show("Пациент успешно удален", "Удаление пациента", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
         private async Task RefreshAsync()
         {
             await LoadPatientsAsync();
