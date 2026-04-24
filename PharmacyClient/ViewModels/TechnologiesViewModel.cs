@@ -64,7 +64,7 @@ namespace PharmacyClient.ViewModels
                     foreach (var type in types)
                     {
                         AllMedicineTypes.Add(type);
-                        MedicineTypeOptions.Add(type.Name);
+                        MedicineTypeOptions.Add(type.TypeName);
                     }
                 });
 
@@ -74,7 +74,7 @@ namespace PharmacyClient.ViewModels
 
                 if (!string.IsNullOrEmpty(MedicineTypeFilter) && MedicineTypeFilter != "Все")
                 {
-                    query = query.Where(t => t.MedicineType.Name == MedicineTypeFilter);
+                    query = query.Where(t => t.MedicineType.TypeName == MedicineTypeFilter);
                 }
 
                 if (!string.IsNullOrEmpty(SearchText))

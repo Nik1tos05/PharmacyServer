@@ -69,7 +69,7 @@ namespace PharmacyClient.ViewModels
                     query = query.Where(o =>
                         o.OrderNumber.Contains(SearchText) ||
                         (o.Patient != null && (o.Patient.LastName.Contains(SearchText) || o.Patient.FirstName.Contains(SearchText))) ||
-                        (o.Medicine != null && o.Medicine.Name.Contains(SearchText)));
+                        (o.Medicine != null && o.Medicine.MedicineName.Contains(SearchText)));
                 }
 
                 var ordersList = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
