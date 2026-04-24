@@ -22,6 +22,13 @@
                        VerticalAlignment="Center"
                        Margin="0,0,20,0"/>
             
+            <Button Content="Добавить" 
+                    Command="{Binding AddUserCommand}"
+                    Padding="15,8"
+                    Margin="5,0"
+                    Background="#4CAF50"
+                    Foreground="White"/>
+            
             <Button Content="Обновить" 
                     Command="{Binding RefreshCommand}"
                     Padding="15,8"
@@ -35,7 +42,8 @@
                 CornerRadius="5"
                 Padding="10"
                 Margin="0,0,0,10"
-                Background="#E3F2FD">
+                Background="#E3F2FD"
+                Visibility="{Binding IsAddingUser, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -55,21 +63,7 @@
                            Margin="0,0,20,5"/>
 
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,5">
-                    <ComboBox ItemsSource="{Binding AvailableEmployees}"
-                              SelectedValue="{Binding SelectedEmployeeId}"
-                              SelectedValuePath="EmployeeId"
-                              DisplayMemberPath="FullName"
-                              Width="250"
-                              Margin="0,0,10,0"
-                              VerticalAlignment="Center">
-                        <ComboBox.Resources>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="ToolTip" Value="{Binding Position}"/>
-                            </Style>
-                        </ComboBox.Resources>
-                    </ComboBox>
-                    
-                    <TextBox Width="150"
+                    <TextBox Width="200"
                              Margin="0,0,10,0"
                              VerticalAlignment="Center">
                         <TextBox.Text>
@@ -87,16 +81,24 @@
                               Margin="0,0,10,0"
                               VerticalAlignment="Center"/>
                     
-                    <Button Content="Создать пользователя" 
+                    <Button Content="Создать" 
                             Command="{Binding CreateUserCommand}"
                             Padding="15,8"
                             Background="#4CAF50"
                             Foreground="White"
                             VerticalAlignment="Center"/>
+                    
+                    <Button Content="Отмена" 
+                            Command="{Binding CancelAddUserCommand}"
+                            Padding="15,8"
+                            Margin="5,0,0,0"
+                            Background="#9E9E9E"
+                            Foreground="White"
+                            VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                           Text="• Выберите сотрудника, введите логин (на латинице), выберите роль и нажмите 'Создать пользователя'. Пароль по умолчанию: 12345678" 
+                           Text="• Введите логин нового пользователя (на латинице), выберите роль и нажмите 'Создать'. Пароль по умолчанию: 12345678" 
                            FontStyle="Italic"
                            Foreground="#666"
                            Margin="0,5,0,0"/>
@@ -113,19 +115,22 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      IsReadOnly="True"
+                      IsReadOnly="False"
                       GridLinesVisibility="Horizontal"
                       AlternatingRowBackground="#F5F5F5"
                       HeadersVisibility="Column"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      BeginningEdit="DataGrid_BeginningEdit"
+                      CellEditEnding="DataGrid_CellEditEnding"
+                      RowEditEnding="DataGrid_RowEditEnding">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Логин" Binding="{Binding LoginName}" Width="120"/>
-                    <DataGridTextColumn Header="Роль" Binding="{Binding RoleName}" Width="130"/>
-                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName}" Width="120"/>
-                    <DataGridTextColumn Header="Имя" Binding="{Binding FirstName}" Width="100"/>
-                    <DataGridTextColumn Header="Отчество" Binding="{Binding Patronymic}" Width="100"/>
-                    <DataGridTextColumn Header="Должность" Binding="{Binding Position}" Width="150"/>
-                    <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive}" Width="70"/>
+                    <DataGridTextColumn Header="Логин" Binding="{Binding LoginName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridTextColumn Header="Роль" Binding="{Binding RoleName, UpdateSourceTrigger=PropertyChanged}" Width="130"/>
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                    <DataGridTextColumn Header="Отчество" Binding="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                    <DataGridTextColumn Header="Должность" Binding="{Binding Position, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+                    <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

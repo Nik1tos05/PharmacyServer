@@ -44,10 +44,7 @@ namespace PharmacyClient.ViewModels
         };
 
         [ObservableProperty]
-        private int? _selectedEmployeeId;
-
-        [ObservableProperty]
-        private ObservableCollection<EmployeeInfo> _availableEmployees = new();
+        private bool _isAddingUser;
 
         public AdministrationViewModel()
         {
@@ -63,54 +60,6 @@ namespace PharmacyClient.ViewModels
                 StatusMessage = "Загрузка учетных записей...";
 
                 UserAccounts.Clear();
-                AvailableEmployees.Clear();
-
-                // Загружаем всех сотрудников через LINQ
-                var employees = await _context.Employees
-                    .Where(e => e.IsActive == true)
-                    .OrderBy(e => e.LastName)
-                    .ToListAsync();
-
-                foreach (var emp in employees)
-                {
-                    AvailableEmployees.Add(new EmployeeInfo
-                    {
-                        EmployeeId = emp.EmployeeId,
-                        FullName = emp.FullName,
-                        Position = emp.Position,
-                        Department = emp.Department ?? ""
-                    });
-                }
-
-                // Загружаем все связи логинов с сотрудниками из таблицы EmployeeLogins
-                var employeeLogins = await _context.EmployeeLogins
-                    .Include(el => el.Employee)
-                    .Where(el => el.EmployeeId.HasValue)
-                    .ToListAsync();
-
-                // Отладочная информация
-                System.Diagnostics.Debug.WriteLine($"Загружено записей EmployeeLogins: {employeeLogins.Count}");
-                foreach (var el in employeeLogins)
-                {
-                    System.Diagnostics.Debug.WriteLine($"  LoginName: '{el.LoginName}', EmployeeId: {el.EmployeeId}, Employee: {(el.Employee != null ? el.Employee.LastName : "null")}");
-                }
-
-                // Создаем словарь для быстрого поиска сотрудника по LoginName (ключу таблицы EmployeeLogins)
-                // Используем нормализацию ключей (trim + lowercase) для надежного сравнения
-                var loginToEmployeeMap = new Dictionary<string, Employee>(StringComparer.OrdinalIgnoreCase);
-                foreach (var el in employeeLogins.Where(el => !string.IsNullOrEmpty(el.LoginName) && el.Employee != null))
-                {
-                    var key = el.LoginName.Trim().ToLower();
-                    if (!loginToEmployeeMap.ContainsKey(key))
-                    {
-                        loginToEmployeeMap[key] = el.Employee!;
-                        System.Diagnostics.Debug.WriteLine($"Добавлен в словарь: '{key}' -> {el.Employee.LastName}");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Дубликат ключа '{key}', пропускаем");
-                    }
-                }
 
                 // Получаем список пользователей БД и их роли через LINQ к системным таблицам
                 var connectionString = App.CurrentUserSession?.ConnectionString;
@@ -121,7 +70,6 @@ namespace PharmacyClient.ViewModels
                 }
 
                 // Используем Raw SQL query через EF Core для получения информации о пользователях
-                // Это всё ещё LINQ-подход, так как мы используем DbContext
                 var userQuery = await _context.Database
                     .SqlQueryRaw<UserAccountDbInfo>(@"
                         SELECT 
@@ -135,71 +83,20 @@ namespace PharmacyClient.ViewModels
                         ORDER BY u.name")
                     .ToListAsync();
 
-                System.Diagnostics.Debug.WriteLine($"Загружено пользователей БД: {userQuery.Count}");
-                foreach (var u in userQuery)
-                {
-                    System.Diagnostics.Debug.WriteLine($"  Пользователь БД: '{u.UserName}', Роль: '{u.RoleName}'");
-                }
-
-                // Объединяем информацию о пользователях БД с сотрудниками через LINQ
+                // Создаем информацию о пользователях
                 foreach (var userInfo in userQuery)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Поиск сотрудника для пользователя: '{userInfo.UserName}'");
-                    
-                    // Пытаемся найти сотрудника по словарю из EmployeeLogins (по LoginName)
-                    // Нормализуем ключ поиска (trim + lowercase)
-                    var searchKey = userInfo.UserName.Trim().ToLower();
-                    Employee? employee = null;
-                    
-                    if (!loginToEmployeeMap.TryGetValue(searchKey, out employee))
-                    {
-                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins (ключ '{searchKey}')");
-                        
-                        // Если не нашли через EmployeeLogins, пробуем найти напрямую через EmployeeLogins table
-                        // Также нормализуем поиск
-                        var directLogin = await _context.EmployeeLogins
-                            .Include(el => el.Employee)
-                            .FirstOrDefaultAsync(el => el.LoginName.Trim().ToLower() == searchKey);
-                        
-                        if (directLogin != null && directLogin.Employee != null)
-                        {
-                            employee = directLogin.Employee;
-                            System.Diagnostics.Debug.WriteLine($"  Найдено через прямой запрос: {employee.LastName}");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  Не найдено через прямой запрос EmployeeLogins");
-                            
-                            // Резервный вариант: ищем по совпадению имени (транслитерация)
-                            foreach (var e in employees)
-                            {
-                                var empLogin = CreateLoginName(e.LastName, e.FirstName);
-                                System.Diagnostics.Debug.WriteLine($"    Проверка сотрудника {e.LastName} -> логин '{empLogin}' (ищем '{userInfo.UserName}')");
-                                if (empLogin.ToLower() == userInfo.UserName.ToLower())
-                                {
-                                    employee = e;
-                                    System.Diagnostics.Debug.WriteLine($"    Найдено совпадение по транслитерации!");
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"  Найдено в словаре: {employee?.LastName}");
-                    }
-
                     UserAccounts.Add(new UserAccountInfo
                     {
                         LoginName = userInfo.UserName,
                         RoleName = userInfo.RoleName,
-                        LastName = employee?.LastName ?? "Не привязан",
-                        FirstName = employee?.FirstName ?? "",
-                        Patronymic = employee?.Patronymic ?? "",
-                        Position = employee?.Position ?? "Не указана",
-                        Department = employee?.Department ?? "",
-                        IsActive = employee?.IsActive ?? false,
-                        EmployeeId = employee?.EmployeeId
+                        LastName = "",
+                        FirstName = "",
+                        Patronymic = "",
+                        Position = "",
+                        Department = "",
+                        IsActive = true,
+                        EmployeeId = null
                     });
                 }
 
@@ -217,46 +114,24 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        private string CreateLoginName(string lastName, string firstName)
+        [RelayCommand]
+        private void AddUser()
         {
-            // Создаем логин на основе фамилии (транслитерация упрощенная)
-            var translitDict = new Dictionary<char, string>
-            {
-                {'а', "a"}, {'б', "b"}, {'в', "v"}, {'г', "g"}, {'д', "d"},
-                {'е', "e"}, {'ё', "yo"}, {'ж', "zh"}, {'з', "z"}, {'и', "i"},
-                {'й', "y"}, {'к', "k"}, {'л', "l"}, {'м', "m"}, {'н', "n"},
-                {'о', "o"}, {'п', "p"}, {'р', "r"}, {'с', "s"}, {'т', "t"},
-                {'у', "u"}, {'ф', "f"}, {'х', "kh"}, {'ц', "ts"}, {'ч', "ch"},
-                {'ш', "sh"}, {'щ', "sch"}, {'ъ', ""}, {'ы', "y"}, {'ь', ""},
-                {'э', "e"}, {'ю', "yu"}, {'я', "ya"}
-            };
+            IsAddingUser = true;
+            NewLoginName = string.Empty;
+            SelectedRole = "Pharmacy_Staff";
+        }
 
-            string Transliterate(string text)
-            {
-                var result = "";
-                foreach (var c in text.ToLower())
-                {
-                    if (translitDict.ContainsKey(c))
-                        result += translitDict[c];
-                    else if (char.IsLetter(c))
-                        result += c;
-                }
-                return result;
-            }
-
-            return Transliterate(lastName);
+        [RelayCommand]
+        private void CancelAddUser()
+        {
+            IsAddingUser = false;
+            NewLoginName = string.Empty;
         }
 
         [RelayCommand]
         private async Task CreateUserAsync()
         {
-            if (SelectedEmployeeId == null)
-            {
-                MessageBox.Show("Выберите сотрудника для создания учетной записи", "Предупреждение",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             if (string.IsNullOrWhiteSpace(NewLoginName))
             {
                 MessageBox.Show("Введите имя пользователя (логин)", "Предупреждение",
@@ -265,7 +140,7 @@ namespace PharmacyClient.ViewModels
             }
 
             var confirm = MessageBox.Show(
-                $"Создать учетную запись для сотрудника?\n\nЛогин: {NewLoginName}\nРоль: {SelectedRole}\nПароль: {NewPassword}",
+                $"Создать учетную запись?\\n\\nЛогин: {NewLoginName}\\nРоль: {SelectedRole}\\nПароль: {NewPassword}",
                 "Создание пользователя", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm != MessageBoxResult.Yes)
@@ -279,8 +154,7 @@ namespace PharmacyClient.ViewModels
                 await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                 await connection.OpenAsync();
 
-                // Создаем пользователя в базе данных через SQL (необходимо для создания login)
-                // EF Core не поддерживает создание пользователей БД, это делается только через SQL
+                // Создаем пользователя в базе данных через SQL
                 var createUserSql = $@"
                     IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '{NewLoginName}')
                     BEGIN
@@ -305,11 +179,11 @@ namespace PharmacyClient.ViewModels
                 await cmd.ExecuteNonQueryAsync();
 
                 StatusMessage = $"Пользователь '{NewLoginName}' успешно создан";
-                MessageBox.Show($"Пользователь успешно создан!\n\nЛогин: {NewLoginName}\nПароль: {NewPassword}",
+                MessageBox.Show($"Пользователь успешно создан!\\n\\nЛогин: {NewLoginName}\\nПароль: {NewPassword}",
                     "Создание пользователя", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 NewLoginName = string.Empty;
-                SelectedEmployeeId = null;
+                IsAddingUser = false;
                 
                 await LoadUserAccountsAsync();
             }
@@ -335,7 +209,7 @@ namespace PharmacyClient.ViewModels
             }
 
             var confirm = MessageBox.Show(
-                $"Вы действительно хотите удалить пользователя '{SelectedUser.LoginName}'?\n\nЭто действие необратимо!",
+                $"Вы действительно хотите удалить пользователя '{SelectedUser.LoginName}'?\\n\\nЭто действие необратимо!",
                 "Удаление пользователя", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (confirm != MessageBoxResult.Yes)
@@ -393,7 +267,7 @@ namespace PharmacyClient.ViewModels
             }
 
             var confirm = MessageBox.Show(
-                $"Вы действительно хотите сбросить пароль для пользователя '{SelectedUser.LoginName}'?\n\nНовый пароль: {NewPassword}",
+                $"Вы действительно хотите сбросить пароль для пользователя '{SelectedUser.LoginName}'?\\n\\nНовый пароль: {NewPassword}",
                 "Сброс пароля", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm != MessageBoxResult.Yes)
@@ -403,7 +277,7 @@ namespace PharmacyClient.ViewModels
             {
                 IsLoading = true;
                 var connectionString = App.CurrentUserSession?.ConnectionString;
-                
+
                 await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                 await connection.OpenAsync();
 
@@ -412,7 +286,7 @@ namespace PharmacyClient.ViewModels
                 await cmd.ExecuteNonQueryAsync();
 
                 StatusMessage = $"Пароль для '{SelectedUser.LoginName}' сброшен";
-                MessageBox.Show($"Пароль успешно сброшен!\n\nНовый пароль: {NewPassword}",
+                MessageBox.Show($"Пароль успешно сброшен!\\n\\nНовый пароль: {NewPassword}",
                     "Сброс пароля", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -432,22 +306,47 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
+        private async Task SaveEditedUserAsync(object? parameter)
+        {
+            if (parameter is not UserAccountInfo user)
+                return;
+
+            try
+            {
+                IsLoading = true;
+                var connectionString = App.CurrentUserSession?.ConnectionString;
+
+                await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                // Обновляем роль пользователя
+                var updateRoleSql = $@"
+                    -- Удаляем из текущей роли
+                    EXEC sp_droprolemember '{SelectedRole}', '{user.LoginName}';
+                    
+                    -- Добавляем в новую роль
+                    EXEC sp_addrolemember '{user.RoleName}', '{user.LoginName}';";
+
+                await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(updateRoleSql, connection);
+                await cmd.ExecuteNonQueryAsync();
+
+                StatusMessage = $"Пользователь '{user.LoginName}' обновлен";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка обновления пользователя: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
         private async Task RefreshAsync()
         {
             await LoadUserAccountsAsync();
-        }
-
-        [RelayCommand(CanExecute = nameof(CanOpenCreateUserForm))]
-        private void OpenCreateUserForm()
-        {
-            // Открываем диалог создания пользователя
-            SelectedEmployeeId = null;
-            NewLoginName = string.Empty;
-        }
-
-        private bool CanOpenCreateUserForm()
-        {
-            return true;
         }
 
         partial void OnSelectedUserChanged(UserAccountInfo? value)
@@ -477,13 +376,5 @@ namespace PharmacyClient.ViewModels
     {
         public string UserName { get; set; } = string.Empty;
         public string RoleName { get; set; } = string.Empty;
-    }
-
-    public class EmployeeInfo
-    {
-        public int EmployeeId { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string Position { get; set; } = string.Empty;
-        public string Department { get; set; } = string.Empty;
     }
 }
