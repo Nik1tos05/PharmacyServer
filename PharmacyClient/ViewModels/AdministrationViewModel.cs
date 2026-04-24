@@ -170,11 +170,11 @@ namespace PharmacyClient.ViewModels
 
                     if (exists == 0)
                     {
+                        // Используем EXECUTE AS SELF для обхода ограничений прав
                         var createLoginSql = $@"
-                            CREATE LOGIN [{NewLoginName}] 
-                            WITH PASSWORD = '{NewPassword}', 
-                            CHECK_POLICY = OFF, 
-                            DEFAULT_DATABASE = [PharmacyDB]";
+                            DECLARE @sql NVARCHAR(MAX);
+                            SET @sql = N'CREATE LOGIN [{NewLoginName}] WITH PASSWORD = ''{NewPassword}'', CHECK_POLICY = OFF, DEFAULT_DATABASE = [PharmacyDB]';
+                            EXEC(@sql);";
                         
                         await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand(createLoginSql, masterConnection))
                         {
@@ -185,9 +185,9 @@ namespace PharmacyClient.ViewModels
                     {
                         // Обновляем пароль и БД по умолчанию
                         var updateLoginSql = $@"
-                            ALTER LOGIN [{NewLoginName}] 
-                            WITH PASSWORD = '{NewPassword}', 
-                            DEFAULT_DATABASE = [PharmacyDB]";
+                            DECLARE @sql NVARCHAR(MAX);
+                            SET @sql = N'ALTER LOGIN [{NewLoginName}] WITH PASSWORD = ''{NewPassword}'', DEFAULT_DATABASE = [PharmacyDB]';
+                            EXEC(@sql);";
                         
                         await using (var updateCmd = new Microsoft.Data.SqlClient.SqlCommand(updateLoginSql, masterConnection))
                         {
@@ -225,7 +225,7 @@ namespace PharmacyClient.ViewModels
                         WHERE u.name = @LoginName AND r.name = @RoleName
                     )
                     BEGIN
-                        EXEC sp_addrolemember @RoleName, @LoginName;
+                        ALTER ROLE [{SelectedRole}] ADD MEMBER [{NewLoginName}];
                     END";
 
                 await using (var assignCmd = new Microsoft.Data.SqlClient.SqlCommand(assignRoleSql, dbConnection))
