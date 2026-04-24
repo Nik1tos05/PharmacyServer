@@ -1,66 +1,33 @@
-# Compiled and build artifacts
-*.o
-*.obj
-*.exe
+```
+# Build artifacts
+bin/
+obj/
 *.dll
-*.so
-*.a
-*.out
-*.pyc
-*.class
-__pycache__/
+*.exe
+*.pdb
+*.config
+*.manifest
+*.nupkg
+packages/
 
-# Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-*.env.*
-
-# Build directories
-dist/
-build/
-target/
+# Logs
 *.log
-*.tmp
-*.swp
-*.swo
 
-# Editors
+# Environment specific
+.vs/
 .vscode/
-.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
 
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Python specific
-*.pyc
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-
-# Java specific
-*.class
-*.jar
-.gradle/
-
-# Node specific
-node_modules/
-
-# Other common ignores
-*.log
-*.tmp
-*.swp
-*.swo
-Thumbs.db
-.DS_Store
-coverage/
-htmlcov/
-.coverage
+# Dependency cache
+.nuget/
+```

@@ -140,7 +140,7 @@ namespace PharmacyClient.ViewModels
             }
 
             var confirm = MessageBox.Show(
-                $"Создать учетную запись?\\n\\nЛогин: {NewLoginName}\\nРоль: {SelectedRole}\\nПароль: {NewPassword}",
+                $"Создать учетную запись?\n\nЛогин: {NewLoginName}\nРоль: {SelectedRole}\nПароль: {NewPassword}",
                 "Создание пользователя", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm != MessageBoxResult.Yes)
@@ -151,38 +151,92 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 var connectionString = App.CurrentUserSession?.ConnectionString;
                 
-                await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-                await connection.OpenAsync();
+                // Создаем строку подключения к master для создания LOGIN
+                var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString)
+                {
+                    InitialCatalog = "master"
+                };
+                var masterConnectionString = builder.ConnectionString;
 
-                // Создаем пользователя в базе данных через SQL
-                // Для пользователей без LOGIN нужно использовать синтаксис с SID и PASSWORD
-                var createUserSql = $@"
-                    IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '{NewLoginName}')
-                    BEGIN
-                        CREATE USER [{NewLoginName}] WITH PASSWORD = '{NewPassword}';
-                    END
-                    ELSE
-                    BEGIN
-                        ALTER USER [{NewLoginName}] WITH PASSWORD = '{NewPassword}';
-                    END
-                    
-                    -- Назначаем роль
-                    DECLARE @roleName sysname = '{SelectedRole}';
+                await using var masterConnection = new Microsoft.Data.SqlClient.SqlConnection(masterConnectionString);
+                await masterConnection.OpenAsync();
+
+                // 1. Сначала создаем LOGIN на уровне сервера (если не существует)
+                var checkLoginSql = $"SELECT COUNT(*) FROM sys.server_principals WHERE name = @LoginName";
+                await using (var checkCmd = new Microsoft.Data.SqlClient.SqlCommand(checkLoginSql, masterConnection))
+                {
+                    checkCmd.Parameters.AddWithValue("@LoginName", NewLoginName);
+                    var exists = (int)await checkCmd.ExecuteScalarAsync();
+
+                    if (exists == 0)
+                    {
+                        var createLoginSql = $@"
+                            CREATE LOGIN [{NewLoginName}] 
+                            WITH PASSWORD = '{NewPassword}', 
+                            CHECK_POLICY = OFF, 
+                            DEFAULT_DATABASE = [PharmacyDB]";
+                        
+                        await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand(createLoginSql, masterConnection))
+                        {
+                            await createCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                    else
+                    {
+                        // Обновляем пароль и БД по умолчанию
+                        var updateLoginSql = $@"
+                            ALTER LOGIN [{NewLoginName}] 
+                            WITH PASSWORD = '{NewPassword}', 
+                            DEFAULT_DATABASE = [PharmacyDB]";
+                        
+                        await using (var updateCmd = new Microsoft.Data.SqlClient.SqlCommand(updateLoginSql, masterConnection))
+                        {
+                            await updateCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                }
+
+                // 2. Переключаемся на базу данных PharmacyDB и создаем USER
+                await using var dbConnection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+                await dbConnection.OpenAsync();
+
+                var checkUserSql = $"SELECT COUNT(*) FROM sys.database_principals WHERE name = @LoginName";
+                await using (var checkCmd = new Microsoft.Data.SqlClient.SqlCommand(checkUserSql, dbConnection))
+                {
+                    checkCmd.Parameters.AddWithValue("@LoginName", NewLoginName);
+                    var exists = (int)await checkCmd.ExecuteScalarAsync();
+
+                    if (exists == 0)
+                    {
+                        var createUserSql = $"CREATE USER [{NewLoginName}] FOR LOGIN [{NewLoginName}]";
+                        await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand(createUserSql, dbConnection))
+                        {
+                            await createCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                }
+
+                // 3. Назначаем роль
+                var assignRoleSql = $@"
                     IF NOT EXISTS (
                         SELECT 1 FROM sys.database_role_members rm
                         JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
                         JOIN sys.database_principals u ON rm.member_principal_id = u.principal_id
-                        WHERE u.name = '{NewLoginName}' AND r.name = @roleName
+                        WHERE u.name = @LoginName AND r.name = @RoleName
                     )
                     BEGIN
-                        EXEC sp_addrolemember @roleName, '{NewLoginName}';
+                        EXEC sp_addrolemember @RoleName, @LoginName;
                     END";
 
-                await using var cmd = new Microsoft.Data.SqlClient.SqlCommand(createUserSql, connection);
-                await cmd.ExecuteNonQueryAsync();
+                await using (var assignCmd = new Microsoft.Data.SqlClient.SqlCommand(assignRoleSql, dbConnection))
+                {
+                    assignCmd.Parameters.AddWithValue("@LoginName", NewLoginName);
+                    assignCmd.Parameters.AddWithValue("@RoleName", SelectedRole);
+                    await assignCmd.ExecuteNonQueryAsync();
+                }
 
                 StatusMessage = $"Пользователь '{NewLoginName}' успешно создан";
-                MessageBox.Show($"Пользователь успешно создан!\\n\\nЛогин: {NewLoginName}\\nПароль: {NewPassword}",
+                MessageBox.Show($"Пользователь успешно создан!\n\nЛогин: {NewLoginName}\nПароль: {NewPassword}",
                     "Создание пользователя", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 NewLoginName = string.Empty;
@@ -194,6 +248,7 @@ namespace PharmacyClient.ViewModels
             {
                 MessageBox.Show($"Ошибка создания пользователя: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusMessage = $"Ошибка: {ex.Message}";
             }
             finally
             {
