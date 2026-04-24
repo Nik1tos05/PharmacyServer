@@ -30,7 +30,7 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoadDoctorsAsync()
+        public async Task LoadDoctorsAsync()
         {
             try
             {
@@ -94,7 +94,6 @@ namespace PharmacyClient.ViewModels
                 {
                     LastName = "Новый",
                     FirstName = "Врач",
-                    RegistrationDate = DateTime.Now,
                     CreatedDate = DateTime.Now,
                     ModifiedDate = DateTime.Now
                 };
@@ -136,8 +135,9 @@ namespace PharmacyClient.ViewModels
                 return;
             }
 
+            var fullName = $"{SelectedDoctor.LastName} {SelectedDoctor.FirstName} {(string.IsNullOrEmpty(SelectedDoctor.Patronymic) ? "" : SelectedDoctor.Patronymic)}";
             var result = MessageBox.Show(
-                $"Вы действительно хотите удалить врача {SelectedDoctor.FullName}?",
+                $"Вы действительно хотите удалить врача {fullName}?",
                 "Удаление врача", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)

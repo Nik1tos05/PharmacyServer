@@ -47,7 +47,7 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoadEmployeesAsync()
+        public async Task LoadEmployeesAsync()
         {
             try
             {

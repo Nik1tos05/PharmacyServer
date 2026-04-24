@@ -30,7 +30,7 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoadPatientsAsync()
+        public async Task LoadPatientsAsync()
         {
             try
             {
@@ -137,8 +137,9 @@ namespace PharmacyClient.ViewModels
                 return;
             }
 
+            var fullName = $"{SelectedPatient.LastName} {SelectedPatient.FirstName} {(string.IsNullOrEmpty(SelectedPatient.Patronymic) ? "" : SelectedPatient.Patronymic)}";
             var result = MessageBox.Show(
-                $"Вы действительно хотите удалить пациента {SelectedPatient.FullName}?",
+                $"Вы действительно хотите удалить пациента {fullName}?",
                 "Удаление пациента", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes)
