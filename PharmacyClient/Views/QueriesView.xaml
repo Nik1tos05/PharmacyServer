@@ -105,7 +105,13 @@
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
                               DisplayMemberPath="MedicineName"
-                              Margin="5,0,0,0"/>
+                              Margin="5,0,0,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding MedicineName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </Grid>
 
                 <Grid Visibility="{Binding MedicineSelectionRequired, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
@@ -118,7 +124,13 @@
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
                               DisplayMemberPath="MedicineName"
-                              Margin="5,0,0,0"/>
+                              Margin="5,0,0,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding MedicineName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </Grid>
 
                 <Grid Visibility="{Binding ShowMedicineTypeParameter, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">

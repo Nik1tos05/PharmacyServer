@@ -218,6 +218,9 @@ namespace PharmacyClient.ViewModels
                     MedicineTypes.Add(type);
 
                 StatusMessage = $"Загружено справочных данных: категории ({categories.Count}), лекарства ({medicines.Count}), типы ({types.Count})";
+                
+                // Уведомляем интерфейс об обновлении коллекций для запросов 11 и 13
+                OnPropertyChanged(nameof(Medicines));
             }
             catch (Exception ex)
             {
@@ -411,6 +414,9 @@ namespace PharmacyClient.ViewModels
                 }
                 
                 StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
+                MessageBox.Show("Выберите лекарство из списка и нажмите 'Выполнить'", 
+                    "Требуется выбор лекарства", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
                 return null;
             }
             
@@ -447,6 +453,9 @@ namespace PharmacyClient.ViewModels
                 }
                 
                 StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
+                MessageBox.Show("Выберите лекарство из списка и нажмите 'Выполнить'", 
+                    "Требуется выбор лекарства", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
                 return null;
             }
             
