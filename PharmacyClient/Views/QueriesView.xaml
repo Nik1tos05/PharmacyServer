@@ -108,20 +108,6 @@
                               Margin="5,0,0,0"/>
                 </Grid>
 
-                <Grid Visibility="{Binding ShowMedicineTypeParameter, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Тип лекарства:" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" 
-                              ItemsSource="{Binding MedicineTypes}"
-                              SelectedItem="{Binding SelectedMedicineType}"
-                              DisplayMemberPath="TypeName"
-                              Margin="5,0,0,0"/>
-                </Grid>
-
-                <!-- Специальный блок для запросов 11 и 13: выбор лекарства -->
                 <Grid Visibility="{Binding MedicineSelectionRequired, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200"/>
@@ -132,6 +118,19 @@
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
                               DisplayMemberPath="MedicineName"
+                              Margin="5,0,0,0"/>
+                </Grid>
+
+                <Grid Visibility="{Binding ShowMedicineTypeParameter, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,5,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Тип лекарства:" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" 
+                              ItemsSource="{Binding MedicineTypes}"
+                              SelectedItem="{Binding SelectedMedicineType}"
+                              DisplayMemberPath="TypeName"
                               Margin="5,0,0,0"/>
                 </Grid>
 

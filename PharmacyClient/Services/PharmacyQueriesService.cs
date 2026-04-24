@@ -121,19 +121,20 @@ public class PharmacyQueriesService
                           && (order.OrderStatus == "Выполнен" || order.OrderStatus == "Выдан")
                     join medicineComposition in _context.MedicineCompositions on order.MedicineId equals medicineComposition.MedicineId
                     join component in _context.Components on medicineComposition.ComponentId equals component.ComponentId
+                    join unit in _context.UnitsOfMeasure on component.UnitId equals unit.UnitId into unitJoin
+                    from unit in unitJoin.DefaultIfEmpty()
                     where componentIds == null || componentIds.Contains(component.ComponentId)
-                    group new { CompQuantity = medicineComposition.Quantity, OrderQuantity = order.Quantity } by new 
+                    group new { CompQuantity = medicineComposition.Quantity, OrderQuantity = order.Quantity, UnitName = unit != null ? unit.UnitName : "Не указана" } by new 
                     { 
                         component.ComponentId, 
                         component.ComponentName,
-                        component.UnitId,
-                        unit = component.Unit 
+                        UnitName = unit != null ? unit.UnitName : "Не указана"
                     } into g
                     select new ComponentUsageInfo
                     {
                         ComponentId = g.Key.ComponentId,
                         ComponentName = g.Key.ComponentName,
-                        UnitName = g.Key.unit.UnitName,
+                        UnitName = g.Key.UnitName,
                         TotalQuantity = g.Sum(x => x.OrderQuantity * x.CompQuantity),
                         OrdersCount = g.Count()
                     };
