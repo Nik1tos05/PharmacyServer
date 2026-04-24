@@ -149,9 +149,7 @@
             
             <!-- Additional tabs will be shown/hidden based on role -->
             <TabItem Header="Лекарства" x:Name="MedicinesTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел управления лекарствами" FontSize="16"/>
-                </Grid>
+                <local:MedicinesView/>
             </TabItem>
             
             <TabItem Header="Компоненты" x:Name="ComponentsTab">
