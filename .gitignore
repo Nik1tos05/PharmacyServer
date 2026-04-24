@@ -1,42 +1,62 @@
 ```
-# Build artifacts
-bin/
-obj/
-*.exe
-*.dll
-*.pdb
-*.userprefs
-*.cache
-*.manifest
-*.lockb
-*.tmp
-*.log
+# SQL-related build artifacts (if any generated)
+*.sql.log
+*.sql.out
+*.sql.err
 
-# Dependency directories
-packages/
+# Dependencies (if any SQL project dependencies)
 node_modules/
-bower_components/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
 
-# IDE files
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+# Build/dist directories (if applicable)
+dist/
+build/
+target/
 
-# OS generated files
-.DS_Store
-Thumbs.db
-ehthumbs.db
-Icon?
-desktop.ini
-
-# Environment specific settings
+# Environment files
 .env
 .env.local
-.env.*
-!/.env.example
+*.env.*
 
-# Test results
-TestResults/
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
