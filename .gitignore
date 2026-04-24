@@ -1,12 +1,14 @@
+```
 # Compiled and build artifacts
 *.pyc
 __pycache__/
 *.o
 *.obj
-*.dll
-*.exe
-*.so
 *.class
+*.exe
+*.dll
+*.so
+*.a
 *.out
 
 # Dependencies
@@ -27,24 +29,20 @@ venv/
 .vscode/
 .idea/
 
-# Coverage reports
+# OS
+.DS_Store
+Thumbs.db
+
+# Build systems
+build/
+dist/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
 coverage/
 htmlcov/
 .coverage
-
-# Distribution artifacts
-dist/
-build/
-target/
-.gradle/
-
-# Python cache
-.mypy_cache/
-.pytest_cache/
-
-# System files
-.DS_Store
-Thumbs.db
 
 # Compressed files
 *.zip
@@ -69,3 +67,4 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```

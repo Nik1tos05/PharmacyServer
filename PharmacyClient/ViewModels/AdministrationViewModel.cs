@@ -151,25 +151,27 @@ namespace PharmacyClient.ViewModels
                 IsLoading = true;
                 var connectionString = App.CurrentUserSession?.ConnectionString;
                 
-                // Создаем строку подключения к базе данных для вызова хранимой процедуры
+                // Создаем строку подключения к базе данных master для вызова хранимой процедуры
+                // Процедура sp_CreateDatabaseUser находится в базе master и выполняется с правами EXECUTE AS OWNER
                 var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString)
                 {
-                    InitialCatalog = "PharmacyDB"
+                    InitialCatalog = "master"
                 };
-                var dbConnectionString = builder.ConnectionString;
+                var masterConnectionString = builder.ConnectionString;
 
-                await using var dbConnection = new Microsoft.Data.SqlClient.SqlConnection(dbConnectionString);
-                await dbConnection.OpenAsync();
+                await using var masterConnection = new Microsoft.Data.SqlClient.SqlConnection(masterConnectionString);
+                await masterConnection.OpenAsync();
 
                 // Вызываем хранимую процедуру для создания пользователя напрямую с параметрами
                 // Процедура выполняется с правами EXECUTE AS OWNER, поэтому не требует прав ALTER ANY LOGIN
-                await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand("dbo.sp_CreateDatabaseUser", dbConnection))
+                await using (var createCmd = new Microsoft.Data.SqlClient.SqlCommand("dbo.sp_CreateDatabaseUser", masterConnection))
                 {
                     createCmd.CommandType = System.Data.CommandType.StoredProcedure;
                     
                     createCmd.Parameters.AddWithValue("@LoginName", NewLoginName);
                     createCmd.Parameters.AddWithValue("@Password", NewPassword);
                     createCmd.Parameters.AddWithValue("@RoleName", SelectedRole);
+                    createCmd.Parameters.AddWithValue("@DatabaseName", "PharmacyDB");
                     
                     await createCmd.ExecuteNonQueryAsync();
                 }
