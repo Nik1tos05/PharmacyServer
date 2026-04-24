@@ -443,7 +443,9 @@ namespace PharmacyClient.ViewModels
             
             try
             {
-                return _queriesService.GetMedicinePriceInfo(SelectedMedicine.MedicineId);
+                var result = _queriesService.GetMedicinePriceInfo(SelectedMedicine.MedicineId);
+                // Оборачиваем результат в коллекцию для корректного отображения в DataGrid
+                return new[] { result };
             }
             catch (Exception ex)
             {
