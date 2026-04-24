@@ -44,9 +44,11 @@
                 <DataGrid ItemsSource="{Binding StockMovements}" 
                           SelectedItem="{Binding SelectedMovement}"
                           AutoGenerateColumns="False"
-                          IsReadOnly="True"
+                          IsReadOnly="False"
                           CanUserAddRows="False"
-                          SelectionMode="Single">
+                          SelectionMode="Single"
+                          BeginningEdit="StockMovementsGrid_BeginningEdit"
+                          CellEditEnding="StockMovementsGrid_CellEditEnding">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Дата" Binding="{Binding MovementDate, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="120"/>
                         <DataGridTextColumn Header="Документ" Binding="{Binding DocumentNumber}" Width="100"/>
@@ -57,7 +59,22 @@
                         <DataGridTextColumn Header="Ед. изм." Binding="{Binding Unit.UnitName}" Width="80"/>
                         <DataGridTextColumn Header="Пред. остаток" Binding="{Binding PreviousStock}" Width="90"/>
                         <DataGridTextColumn Header="Новый остаток" Binding="{Binding NewStock}" Width="90"/>
-                        <DataGridTextColumn Header="Сотрудник" Binding="{Binding PerformedByEmployee.LastName}" Width="120"/>
+                        <DataGridComboBoxColumn Header="Сотрудник" SelectedItemBinding="{Binding PerformedByEmployeeId}" Width="120">
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                        </DataGridComboBoxColumn>
                         <DataGridTextColumn Header="Причина" Binding="{Binding Reason}" Width="150"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -68,15 +85,47 @@
                 <DataGrid ItemsSource="{Binding InventoryChecks}" 
                           SelectedItem="{Binding SelectedInventory}"
                           AutoGenerateColumns="False"
-                          IsReadOnly="True"
+                          IsReadOnly="False"
                           CanUserAddRows="False"
-                          SelectionMode="Single">
+                          SelectionMode="Single"
+                          BeginningEdit="InventoryChecksGrid_BeginningEdit"
+                          CellEditEnding="InventoryChecksGrid_CellEditEnding">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="№ инвентаризации" Binding="{Binding InventoryNumber}" Width="120"/>
                         <DataGridTextColumn Header="Дата проверки" Binding="{Binding CheckDate, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="130"/>
                         <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="100"/>
-                        <DataGridTextColumn Header="Проведена" Binding="{Binding ConductedByEmployee.LastName}" Width="120"/>
-                        <DataGridTextColumn Header="Проверена" Binding="{Binding CheckedByEmployee.LastName, TargetNullValue=''}" Width="120"/>
+                        <DataGridComboBoxColumn Header="Проведена" SelectedItemBinding="{Binding ConductedByEmployeeId}" Width="120">
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn Header="Проверена" SelectedItemBinding="{Binding CheckedByEmployeeId, TargetNullValue=''}" Width="120">
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.EmployeesList}"/>
+                                    <Setter Property="DisplayMemberPath" Value="LastName"/>
+                                    <Setter Property="SelectedValuePath" Value="EmployeeId"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                        </DataGridComboBoxColumn>
                         <DataGridTextColumn Header="Всего проверено" Binding="{Binding TotalItemsChecked}" Width="100"/>
                         <DataGridTextColumn Header="Расхождения" Binding="{Binding DiscrepanciesFound}" Width="90"/>
                         <DataGridTextColumn Header="Просрочено" Binding="{Binding ExpiredItemsCount}" Width="80"/>

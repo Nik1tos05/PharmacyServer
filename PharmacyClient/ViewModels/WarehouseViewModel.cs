@@ -21,6 +21,9 @@ namespace PharmacyClient.ViewModels
         private ObservableCollection<InventoryCheck> _inventoryChecks = new();
 
         [ObservableProperty]
+        private ObservableCollection<Employee> _employeesList = new();
+
+        [ObservableProperty]
         private StockMovement? _selectedMovement;
 
         [ObservableProperty]
@@ -53,6 +56,27 @@ namespace PharmacyClient.ViewModels
         public WarehouseViewModel()
         {
             _context = new PharmacyDbContext();
+            LoadEmployeesAsync().ConfigureAwait(false);
+        }
+
+        private async Task LoadEmployeesAsync()
+        {
+            try
+            {
+                var employees = await _context.Employees.OrderBy(e => e.LastName).ToListAsync();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    EmployeesList.Clear();
+                    foreach (var emp in employees)
+                    {
+                        EmployeesList.Add(emp);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка загрузки сотрудников: {ex.Message}";
+            }
         }
 
         [RelayCommand]
@@ -153,13 +177,72 @@ namespace PharmacyClient.ViewModels
         [RelayCommand]
         private void AddMovement()
         {
-            MessageBox.Show("Функция добавления движения товара будет реализована через форму проведения операции.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                var newMovement = new StockMovement
+                {
+                    MovementDate = DateTime.Now,
+                    DocumentNumber = $"DOC-{DateTime.Now:yyyyMMddHHmmss}",
+                    MovementType = "Приход",
+                    ItemType = "Medicine",
+                    ItemId = 0,
+                    Quantity = 1,
+                    UnitId = EmployeesList.Count > 0 ? 1 : 0,
+                    PreviousStock = 0,
+                    NewStock = 1,
+                    PerformedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
+                    Reason = "Новое движение",
+                    CreatedDate = DateTime.Now
+                };
+
+                _context.StockMovements.Add(newMovement);
+                _context.SaveChanges();
+
+                StockMovements.Insert(0, newMovement);
+                MovementsCount = StockMovements.Count;
+                StatusMessage = "Движение товара успешно добавлено";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка добавления движения: {ex.Message}";
+                MessageBox.Show($"Ошибка добавления движения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand]
         private void AddInventory()
         {
-            MessageBox.Show("Функция создания новой инвентаризации будет реализована с формой проведения инвентаризации.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                var newInventory = new InventoryCheck
+                {
+                    InventoryNumber = $"INV-{DateTime.Now:yyyyMMddHHmmss}",
+                    CheckDate = DateTime.Now,
+                    Status = "В процессе",
+                    ConductedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
+                    TotalItemsChecked = 0,
+                    DiscrepanciesFound = 0,
+                    ExpiredItemsCount = 0,
+                    CriticalNormViolations = 0,
+                    ShortageValue = 0,
+                    SurplusValue = 0,
+                    ReportGenerated = false,
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+
+                _context.InventoryChecks.Add(newInventory);
+                _context.SaveChanges();
+
+                InventoryChecks.Insert(0, newInventory);
+                InventoriesCount = InventoryChecks.Count;
+                StatusMessage = "Инвентаризация успешно создана";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка создания инвентаризации: {ex.Message}";
+                MessageBox.Show($"Ошибка создания инвентаризации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
