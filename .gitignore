@@ -1,52 +1,66 @@
-```gitignore
-# Compiled files
+# Compiled and build artifacts
+*.o
+*.obj
 *.exe
 *.dll
-*.pdb
-*.mdb
-*.user
-*.userosscache
-*.suo
-*.cache
-*.nupkg
-*.snk
-*.tmp
+*.so
+*.a
+*.out
+*.pyc
+*.class
+__pycache__/
 
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-build/
-bld/
-[Bb]in/
-[Oo]bj/
-
-# User-specific files
-*.userprefs
-*.sln.docstates
-*.user
-.vs/
-.vscode/
-
-# Environment specific
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
 .env.local
 *.env.*
 
-# Logs
+# Build directories
+dist/
+build/
+target/
 *.log
-*.err
+*.tmp
+*.swp
+*.swo
 
-# OS generated files
+# Editors
+.vscode/
+.idea/
+
+# System files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-desktop.ini
-```
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python specific
+*.pyc
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+
+# Java specific
+*.class
+*.jar
+.gradle/
+
+# Node specific
+node_modules/
+
+# Other common ignores
+*.log
+*.tmp
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+coverage/
+htmlcov/
+.coverage
