@@ -1,0 +1,106 @@
+<UserControl x:Class="PharmacyClient.Views.WarehouseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:PharmacyClient.ViewModels"
+             Margin="10">
+    <UserControl.DataContext>
+        <vm:WarehouseViewModel />
+    </UserControl.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="200" Margin="0,0,10,0"/>
+            
+            <TextBlock Text="Тип движения:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox ItemsSource="{Binding MovementTypeOptions}" 
+                      SelectedItem="{Binding MovementTypeFilter}" 
+                      Width="150" Margin="0,0,10,0"/>
+            
+            <Button Content="Движения" Command="{Binding LoadMovementsCommand}" 
+                    Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="Инвентаризации" Command="{Binding LoadInventoriesCommand}" 
+                    Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="Обновить все" Command="{Binding RefreshAllCommand}" 
+                    Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="Добавить движение" Command="{Binding AddMovementCommand}" 
+                    Padding="10,5" Margin="0,0,5,0"/>
+            <Button Content="Создать инвентаризацию" Command="{Binding AddInventoryCommand}" 
+                    Padding="10,5"/>
+        </StackPanel>
+
+        <!-- Tab Control for Movements and Inventories -->
+        <TabControl Grid.Row="1" Margin="0,0,0,10" SelectedIndex="{Binding ActiveTab}">
+            <!-- Stock Movements Tab -->
+            <TabItem Header="Движение товаров">
+                <DataGrid ItemsSource="{Binding StockMovements}" 
+                          SelectedItem="{Binding SelectedMovement}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Дата" Binding="{Binding MovementDate, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="120"/>
+                        <DataGridTextColumn Header="Документ" Binding="{Binding DocumentNumber}" Width="100"/>
+                        <DataGridTextColumn Header="Тип" Binding="{Binding MovementType}" Width="100"/>
+                        <DataGridTextColumn Header="Тип объекта" Binding="{Binding ItemType}" Width="80"/>
+                        <DataGridTextColumn Header="ID объекта" Binding="{Binding ItemId}" Width="70"/>
+                        <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="80"/>
+                        <DataGridTextColumn Header="Ед. изм." Binding="{Binding Unit.Name}" Width="80"/>
+                        <DataGridTextColumn Header="Пред. остаток" Binding="{Binding PreviousStock}" Width="90"/>
+                        <DataGridTextColumn Header="Новый остаток" Binding="{Binding NewStock}" Width="90"/>
+                        <DataGridTextColumn Header="Сотрудник" Binding="{Binding PerformedByEmployee.LastName}" Width="120"/>
+                        <DataGridTextColumn Header="Причина" Binding="{Binding Reason}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- Inventory Checks Tab -->
+            <TabItem Header="Инвентаризации">
+                <DataGrid ItemsSource="{Binding InventoryChecks}" 
+                          SelectedItem="{Binding SelectedInventory}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№ инвентаризации" Binding="{Binding InventoryNumber}" Width="120"/>
+                        <DataGridTextColumn Header="Дата проверки" Binding="{Binding CheckDate, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="130"/>
+                        <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="100"/>
+                        <DataGridTextColumn Header="Проведена" Binding="{Binding ConductedByEmployee.LastName}" Width="120"/>
+                        <DataGridTextColumn Header="Проверена" Binding="{Binding CheckedByEmployee.LastName, TargetNullValue=''}" Width="120"/>
+                        <DataGridTextColumn Header="Всего проверено" Binding="{Binding TotalItemsChecked}" Width="100"/>
+                        <DataGridTextColumn Header="Расхождения" Binding="{Binding DiscrepanciesFound}" Width="90"/>
+                        <DataGridTextColumn Header="Просрочено" Binding="{Binding ExpiredItemsCount}" Width="80"/>
+                        <DataGridTextColumn Header="Крит. норма" Binding="{Binding CriticalNormViolations}" Width="90"/>
+                        <DataGridTextColumn Header="Недостача" Binding="{Binding ShortageValue, StringFormat={}{0:C}, TargetNullValue=''}" Width="90"/>
+                        <DataGridTextColumn Header="Излишек" Binding="{Binding SurplusValue, StringFormat={}{0:C}, TargetNullValue=''}" Width="90"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status Bar -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+            <TextBlock Text="{Binding StatusMessage}" FontWeight="Bold"/>
+            <TextBlock Text=" | " Margin="5,0"/>
+            <TextBlock>
+                <Run Text="Движений: "/>
+                <Run Text="{Binding MovementsCount}"/>
+            </TextBlock>
+            <TextBlock Text=" | " Margin="5,0"/>
+            <TextBlock>
+                <Run Text="Инвентаризаций: "/>
+                <Run Text="{Binding InventoriesCount}"/>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</UserControl>

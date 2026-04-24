@@ -5,28 +5,26 @@ obj/
 *.exe
 *.dll
 *.pdb
-*.nupkg
+*.userprefs
+*.cache
+*.log
 
 # Dependencies
 packages/
-node_modules/
 
-# Logs
-*.log
-
-# User-specific files
-*.user
-*.userosscache
-*.suo
-*.userprefs
-
-# Visual Studio files
+# IDE files
 .vs/
-*.VC.db
-*.VC.VC.opendb
-
-# Resharper files
+*.user
+*.suo
 _ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Temporary files
+*.tmp
+*~
 ```
