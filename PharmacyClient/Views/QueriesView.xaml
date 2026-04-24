@@ -104,7 +104,6 @@
                     <ComboBox Grid.Column="1" 
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
-                              DisplayMemberPath="MedicineName"
                               Margin="5,0,0,0">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -123,7 +122,6 @@
                     <ComboBox Grid.Column="1" 
                               ItemsSource="{Binding Medicines}"
                               SelectedItem="{Binding SelectedMedicine}"
-                              DisplayMemberPath="MedicineName"
                               Margin="5,0,0,0">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
