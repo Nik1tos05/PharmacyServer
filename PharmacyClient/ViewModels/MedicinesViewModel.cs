@@ -242,20 +242,41 @@ namespace PharmacyClient.ViewModels
             try
             {
                 await using var context = new PharmacyDbContext();
-                var medicineToDelete = await context.Medicines
-                    .Include(m => m.MedicineCompositions)
-                    .FirstOrDefaultAsync(m => m.MedicineId == SelectedMedicine.MedicineId);
-                    
-                if (medicineToDelete != null)
+                
+                // Проверяем существование хранимой процедуры
+                var procedureExists = await context.Database.SqlQueryRaw<int>(
+                    "SELECT COUNT(*) FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')")
+                    .FirstOrDefaultAsync();
+                
+                if (procedureExists > 0)
                 {
-                    // Сначала удаляем связанные записи состава
-                    if (medicineToDelete.MedicineCompositions != null && medicineToDelete.MedicineCompositions.Any())
+                    // Используем хранимую процедуру
+                    await context.Database.ExecuteSqlInterpolatedAsync(
+                        $"EXEC dbo.sp_DeleteMedicine @MedicineId = {SelectedMedicine.MedicineId}");
+                }
+                else
+                {
+                    // Запасной вариант: прямое удаление с транзакцией
+                    await using var transaction = await context.Database.BeginTransactionAsync();
+                    try
                     {
-                        context.MedicineCompositions.RemoveRange(medicineToDelete.MedicineCompositions);
+                        // Сначала удаляем связанные записи из состава лекарств
+                        var compositionRecords = context.MedicineComposition
+                            .Where(mc => mc.MedicineId == SelectedMedicine.MedicineId);
+                        context.MedicineComposition.RemoveRange(compositionRecords);
+                        await context.SaveChangesAsync();
+                        
+                        // Затем удаляем само лекарство
+                        context.Medicines.Remove(SelectedMedicine);
+                        await context.SaveChangesAsync();
+                        
+                        await transaction.CommitAsync();
                     }
-                    
-                    context.Medicines.Remove(medicineToDelete);
-                    await context.SaveChangesAsync();
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
 
                 StatusMessage = "Лекарство удалено";
@@ -267,7 +288,23 @@ namespace PharmacyClient.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка удаления: {ex.Message}\n\nВнутренняя ошибка: {ex.InnerException?.Message}", "Ошибка", 
+                string errorMsg = $"Ошибка удаления: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMsg += $"\n\nВнутренняя ошибка: {ex.InnerException.Message}";
+                    
+                    // Добавляем подсказку о правах доступа
+                    if (ex.InnerException.Message.Contains("DELETE") || 
+                        ex.InnerException.Message.Contains("запрещено") ||
+                        ex.InnerException.Message.Contains("permission"))
+                    {
+                        errorMsg += "\n\nВозможно, у вашей роли недостаточно прав для удаления лекарств.\n" +
+                                   "Обратитесь к администратору базы данных для выполнения скрипта:\n" +
+                                   "fix_permissions.sql";
+                    }
+                }
+                
+                MessageBox.Show(errorMsg, "Ошибка", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
