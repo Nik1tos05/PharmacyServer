@@ -6,12 +6,11 @@ obj/
 *.exe
 *.pdb
 *.nupkg
-*.snupkg
 
 # Dependencies
 packages/
 node_modules/
-vendor/
+.nuget/
 
 # Logs
 *.log
@@ -23,23 +22,12 @@ vendor/
 
 # Editors
 .vs/
+.vscode/
 .idea/
 *.userprefs
 *.user
-*.suo
-*.userosscache
-*.sln.docstates
 
 # OS generated files
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
-desktop.ini
-
-# Testing
-TestResults/
-
-# Local .NET tools
-.tools/
 ```

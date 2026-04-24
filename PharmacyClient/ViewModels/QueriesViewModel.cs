@@ -240,8 +240,14 @@ namespace PharmacyClient.ViewModels
             ShowMedicineParameter = (SelectedQuery.ParameterType & QueryParameterType.Medicine) == QueryParameterType.Medicine;
             ShowMedicineTypeParameter = (SelectedQuery.ParameterType & QueryParameterType.MedicineType) == QueryParameterType.MedicineType;
 
-            // Для запросов 11 и 13 требуется выбор лекарства, но список лекарств нужно показать после первого нажатия
+            // Для запросов 11 и 13 требуется выбор лекарства - всегда показываем параметр лекарства
             MedicineSelectionRequired = SelectedQuery.Id == 11 || SelectedQuery.Id == 13;
+            
+            // Для запросов 11 и 13 всегда показываем ComboBox с лекарствами
+            if (MedicineSelectionRequired)
+            {
+                ShowMedicineParameter = true;
+            }
 
             // Устанавливаем значения по умолчанию для дат
             if (ShowDateRangeParameter && !StartDate.HasValue)
@@ -395,7 +401,7 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery11()
         {
-            // Если лекарство не выбрано, показываем список всех лекарств для выбора
+            // Если лекарство не выбрано, загружаем список и просим выбрать
             if (SelectedMedicine == null)
             {
                 // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
@@ -404,8 +410,7 @@ namespace PharmacyClient.ViewModels
                     LoadReferenceData();
                 }
                 
-                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить' снова";
-                ShowMedicineParameter = true; // Показываем ComboBox с лекарствами
+                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
                 return null;
             }
             
@@ -432,7 +437,7 @@ namespace PharmacyClient.ViewModels
 
         private object? ExecuteQuery13()
         {
-            // Если лекарство не выбрано, показываем список всех лекарств для выбора
+            // Если лекарство не выбрано, загружаем список и просим выбрать
             if (SelectedMedicine == null)
             {
                 // Загружаем все лекарства в ComboBox, чтобы пользователь мог выбрать
@@ -441,8 +446,7 @@ namespace PharmacyClient.ViewModels
                     LoadReferenceData();
                 }
                 
-                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить' снова";
-                ShowMedicineParameter = true; // Показываем ComboBox с лекарствами
+                StatusMessage = "Выберите лекарство из списка и нажмите 'Выполнить'";
                 return null;
             }
             
