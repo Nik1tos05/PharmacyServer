@@ -4,16 +4,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
-using PharmacyClient.Services;
-using PharmacyClient.Views;
 using PharmacyClient.Models;
 
 namespace PharmacyClient.ViewModels
 {
     public partial class EmployeesViewModel : ObservableObject
     {
-        private readonly SqlServerUserManagementService _userService;
-
         [ObservableProperty]
         private ObservableCollection<Employee> _employees = new();
 
@@ -39,11 +35,6 @@ namespace PharmacyClient.ViewModels
         public EmployeesViewModel()
         {
             Departments.Add("Все");
-            
-            // Инициализируем сервис управления пользователями
-            var connectionString = App.CurrentUserSession?.ConnectionString ?? 
-                                   "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
-            _userService = new SqlServerUserManagementService(connectionString);
         }
 
         [RelayCommand]
@@ -140,147 +131,6 @@ namespace PharmacyClient.ViewModels
         partial void OnFilterDepartmentChanged(string value)
         {
             LoadEmployeesCommand.Execute(null);
-        }
-
-        [RelayCommand]
-        private async Task AddEmployeeAsync()
-        {
-            try
-            {
-                // Открываем диалоговое окно для добавления сотрудника
-                var dialog = new EmployeeDialogView(null, Departments);
-                dialog.Owner = System.Windows.Application.Current.MainWindow;
-                
-                if (dialog.ShowDialog() == true)
-                {
-                    await LoadEmployeesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        [RelayCommand]
-        private async Task EditEmployeeAsync()
-        {
-            if (SelectedEmployee == null)
-            {
-                MessageBox.Show("Выберите сотрудника для редактирования", "Предупреждение",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            try
-            {
-                // Открываем диалоговое окно для редактирования сотрудника
-                var dialog = new EmployeeDialogView(SelectedEmployee, Departments);
-                dialog.Owner = System.Windows.Application.Current.MainWindow;
-                
-                if (dialog.ShowDialog() == true)
-                {
-                    await LoadEmployeesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка редактирования: {ex.Message}", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-
-        [RelayCommand]
-        private async Task ResetPasswordAsync()
-        {
-            if (SelectedEmployee == null)
-            {
-                MessageBox.Show("Выберите сотрудника для сброса пароля", "Предупреждение", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var result = MessageBox.Show(
-                $"Вы действительно хотите сбросить пароль для сотрудника {SelectedEmployee.FullName}?\n\n" +
-                $"Новый пароль будет: 12345678",
-                "Сброс пароля", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            try
-            {
-                await _userService.ResetPasswordAsync(SelectedEmployee, "12345678");
-                
-                MessageBox.Show(
-                    $"Пароль для сотрудника {SelectedEmployee.FullName} успешно сброшен!\n\n" +
-                    $"Новый пароль: 12345678",
-                    "Сброс пароля", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка сброса пароля: {ex.Message}", "Ошибка", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        [RelayCommand]
-        private async Task DeleteEmployeeAsync()
-        {
-            if (SelectedEmployee == null)
-            {
-                MessageBox.Show("Выберите сотрудника для удаления", "Предупреждение", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var result = MessageBox.Show(
-                $"Вы действительно хотите удалить сотрудника {SelectedEmployee.FullName}?\n\n" +
-                $"Внимание: это также удалит учетную запись SQL Server для этого сотрудника.",
-                "Удаление сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            try
-            {
-                // Сначала удаляем учетную запись SQL Server
-                try
-                {
-                    await _userService.DeleteUserAsync(SelectedEmployee);
-                }
-                catch (Exception sqlEx)
-                {
-                    MessageBox.Show(
-                        $"Не удалось автоматически удалить учетную запись SQL Server.\n" +
-                        $"Ошибка: {sqlEx.Message}\n\n" +
-                        $"Сотрудник будет удален из базы данных.",
-                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-                // Удаляем сотрудника из базы данных
-                await using var context = new PharmacyDbContext();
-                var employeeToDelete = await context.Employees.FindAsync(SelectedEmployee.EmployeeId);
-                if (employeeToDelete != null)
-                {
-                    context.Employees.Remove(employeeToDelete);
-                    await context.SaveChangesAsync();
-                }
-
-                StatusMessage = "Сотрудник удален";
-                SelectedEmployee = null;
-                await LoadEmployeesAsync();
-                
-                MessageBox.Show("Сотрудник успешно удален!\n\nУчетная запись SQL Server также удалена.", 
-                    "Удаление сотрудника", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         [RelayCommand]

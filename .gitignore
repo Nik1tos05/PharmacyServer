@@ -1,42 +1,52 @@
-```
-# Build artifacts
-bin/
-obj/
+```gitignore
+# Compiled files
 *.exe
 *.dll
 *.pdb
-*.userprefs
+*.mdb
+*.user
+*.userosscache
+*.suo
+*.cache
+*.nupkg
+*.snk
+*.tmp
 
-# Dependencies
-packages/
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.userprefs
+*.sln.docstates
+*.user
+.vs/
+.vscode/
+
+# Environment specific
+.env
+.env.local
+*.env.*
 
 # Logs
 *.log
+*.err
 
-# User-specific files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Visual Studio files
-.vs/
-*.VC.db
-*.VC.VC.opendb
-
-# Temporary files
-*.tmp
-*~
-Thumbs.db
+# OS generated files
 .DS_Store
-
-# Configuration files
-app.config
-web.config
-
-# Output directories
-Debug/
-Release/
-x64/
-x86/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
 ```
