@@ -1,11 +1,13 @@
-```
 # Build artifacts
 bin/
 obj/
 *.dll
 *.exe
 *.pdb
-*.userprefs
+*.config
+*.manifest
+*.cache
+*.tmp
 
 # Dependencies
 packages/
@@ -20,21 +22,35 @@ node_modules/
 *.env.*
 
 # Editors
+.vs/
 .vscode/
 .idea/
-*.swp
-*.swo
+*.userprefs
+*.user
 
 # OS generated files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Test and coverage
-coverage/
-htmlcov/
-*.coverage
+# Testing
+TestResults/
 
-# Temporary files
-*.tmp
-*.temp
-```
+# NuGet
+*.nupkg
+.nuget/
+
+# Visual Studio
+*.userosscache
+*.suo
+*.user
+*.aps
+*.ncb
+*.ilk
+*.iobj
+*.ipdb
+*.tlog
+*.exp
+*.lib
+*.VC.db
+*.VC.VC.opendb
