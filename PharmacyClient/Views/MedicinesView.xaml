@@ -125,23 +125,22 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      IsReadOnly="True"
+                      IsReadOnly="False"
                       GridLinesVisibility="Horizontal"
                       AlternatingRowBackground="#F5F5F5"
                       HeadersVisibility="Column"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      BeginningEdit="DataGrid_BeginningEdit"
+                      RowEditEnding="DataGrid_RowEditEnding">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Название" Binding="{Binding MedicineName}" Width="200"/>
-                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="200"/>
-                    <DataGridTextColumn Header="Категория" Binding="{Binding Category.CategoryName}" Width="120"/>
-                    <DataGridTextColumn Header="Тип" Binding="{Binding MedicineType.MedicineTypeName}" Width="120"/>
-                    <DataGridTextColumn Header="Ед.изм." Binding="{Binding Unit.UnitName}" Width="80"/>
-                    <DataGridTextColumn Header="Крит.норма" Binding="{Binding CriticalNorm}" Width="80"/>
-                    <DataGridTextColumn Header="Тек.запас" Binding="{Binding CurrentStock}" Width="80"/>
-                    <DataGridTextColumn Header="Себест." Binding="{Binding ManufacturingCost, StringFormat={}{0:F2}}" Width="80"/>
-                    <DataGridTextColumn Header="Цена" Binding="{Binding SalePrice, StringFormat={}{0:F2}}" Width="80"/>
-                    <DataGridCheckBoxColumn Header="Рецепт" Binding="{Binding RequiresPrescription}" Width="60"/>
-                    <DataGridCheckBoxColumn Header="Готовое" Binding="{Binding IsReadyMade}" Width="60"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding MedicineName, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                    <DataGridTextColumn Header="Описание" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                    <DataGridTextColumn Header="Крит.норма" Binding="{Binding CriticalNorm, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                    <DataGridTextColumn Header="Тек.запас" Binding="{Binding CurrentStock, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                    <DataGridTextColumn Header="Себест." Binding="{Binding ManufacturingCost, StringFormat={}{0:F2}, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                    <DataGridTextColumn Header="Цена" Binding="{Binding SalePrice, StringFormat={}{0:F2}, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                    <DataGridCheckBoxColumn Header="Рецепт" Binding="{Binding RequiresPrescription, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                    <DataGridCheckBoxColumn Header="Готовое" Binding="{Binding IsReadyMade, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

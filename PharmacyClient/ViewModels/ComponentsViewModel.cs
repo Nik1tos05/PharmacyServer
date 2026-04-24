@@ -150,6 +150,97 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
+        private async Task AddComponentAsync()
+        {
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                var firstUnit = await context.UnitsOfMeasures.FirstOrDefaultAsync();
+                
+                if (firstUnit == null)
+                {
+                    MessageBox.Show("Необходимо сначала создать единицы измерения", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var newComponent = new Component
+                {
+                    ComponentName = "Новый компонент",
+                    UnitId = firstUnit.UnitId,
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+
+                context.Components.Add(newComponent);
+                await context.SaveChangesAsync();
+
+                StatusMessage = "Компонент добавлен";
+                await LoadComponentsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditComponentAsync()
+        {
+            if (SelectedComponent == null)
+            {
+                MessageBox.Show("Выберите компонент для редактирования", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            MessageBox.Show("Для редактирования нажмите на ячейку таблицы и измените значение", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private async Task DeleteComponentAsync()
+        {
+            if (SelectedComponent == null)
+            {
+                MessageBox.Show("Выберите компонент для удаления", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Вы действительно хотите удалить компонент \"{SelectedComponent.ComponentName}\"?",
+                "Удаление компонента", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                var componentToDelete = await context.Components.FindAsync(SelectedComponent.ComponentId);
+                if (componentToDelete != null)
+                {
+                    context.Components.Remove(componentToDelete);
+                    await context.SaveChangesAsync();
+                }
+
+                StatusMessage = "Компонент удален";
+                SelectedComponent = null;
+                await LoadComponentsAsync();
+                
+                MessageBox.Show("Компонент успешно удален", "Удаление компонента", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
         private async Task RefreshAsync()
         {
             await LoadComponentsAsync();

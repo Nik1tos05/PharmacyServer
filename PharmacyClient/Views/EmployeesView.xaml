@@ -124,22 +124,25 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
-                      IsReadOnly="True"
+                      IsReadOnly="False"
                       GridLinesVisibility="Horizontal"
                       AlternatingRowBackground="#F5F5F5"
                       HeadersVisibility="Column"
-                      SelectionMode="Single">
+                      SelectionMode="Single"
+                      BeginningEdit="DataGrid_BeginningEdit"
+                      CellEditEnding="DataGrid_CellEditEnding"
+                      RowEditEnding="DataGrid_RowEditEnding">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName}" Width="150"/>
-                    <DataGridTextColumn Header="Имя" Binding="{Binding FirstName}" Width="120"/>
-                    <DataGridTextColumn Header="Отчество" Binding="{Binding Patronymic}" Width="120"/>
-                    <DataGridTextColumn Header="Должность" Binding="{Binding Position}" Width="150"/>
-                    <DataGridTextColumn Header="Отдел" Binding="{Binding Department}" Width="120"/>
-                    <DataGridCheckBoxColumn Header="Менеджер" Binding="{Binding IsManager}" Width="70"/>
-                    <DataGridCheckBoxColumn Header="Подпись" Binding="{Binding CanSignDocuments}" Width="70"/>
-                    <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive}" Width="70"/>
-                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="120"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="150"/>
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridTextColumn Header="Отчество" Binding="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridTextColumn Header="Должность" Binding="{Binding Position, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+                    <DataGridTextColumn Header="Отдел" Binding="{Binding Department, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridCheckBoxColumn Header="Менеджер" Binding="{Binding IsManager, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                    <DataGridCheckBoxColumn Header="Подпись" Binding="{Binding CanSignDocuments, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                    <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
