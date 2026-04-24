@@ -155,13 +155,16 @@ namespace PharmacyClient.ViewModels
                 await connection.OpenAsync();
 
                 // Создаем пользователя в базе данных через SQL
+                // Для пользователей без LOGIN нужно использовать синтаксис с SID и PASSWORD
                 var createUserSql = $@"
                     IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '{NewLoginName}')
                     BEGIN
-                        CREATE USER [{NewLoginName}] WITHOUT LOGIN;
+                        CREATE USER [{NewLoginName}] WITH PASSWORD = '{NewPassword}';
                     END
-                    
-                    ALTER USER [{NewLoginName}] WITH PASSWORD = '{NewPassword}';
+                    ELSE
+                    BEGIN
+                        ALTER USER [{NewLoginName}] WITH PASSWORD = '{NewPassword}';
+                    END
                     
                     -- Назначаем роль
                     DECLARE @roleName sysname = '{SelectedRole}';
