@@ -46,7 +46,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Код технологии" Binding="{Binding TechnologyCode}" Width="120"/>
                 <DataGridTextColumn Header="Название лекарства" Binding="{Binding MedicineName}" Width="180"/>
-                <DataGridTextColumn Header="Тип лекарства" Binding="{Binding MedicineType.Name}" Width="130"/>
+                <DataGridTextColumn Header="Тип лекарства" Binding="{Binding MedicineType.TypeName}" Width="130"/>
                 <DataGridTextColumn Header="Метод приготовления" Binding="{Binding PreparationMethod}" Width="250"/>
                 <DataGridTextColumn Header="Время (мин)" Binding="{Binding PreparationTimeMinutes}" Width="90"/>
                 <DataGridTextColumn Header="Активна" Binding="{Binding IsActive}" Width="70"/>

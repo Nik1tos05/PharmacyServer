@@ -1,34 +1,42 @@
 ```
 # Build artifacts
-*.obj
+bin/
+obj/
 *.exe
 *.dll
-*.so
-*.a
-*.lib
 *.pdb
-*.ilk
+*.userprefs
 
 # Dependencies
 packages/
-bin/
-obj/
-Debug/
-Release/
-.vs/
-.vshost.exe
-.vshost.exe.config
-.vshost.pdb
 
 # Logs
 *.log
 
-# Environment
-.env
-.env.local
-*.env.*
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# OS generated files
-.DS_Store
+# Visual Studio files
+.vs/
+*.VC.db
+*.VC.VC.opendb
+
+# Temporary files
+*.tmp
+*~
 Thumbs.db
+.DS_Store
+
+# Configuration files
+app.config
+web.config
+
+# Output directories
+Debug/
+Release/
+x64/
+x86/
 ```
