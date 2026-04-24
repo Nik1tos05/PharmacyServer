@@ -96,10 +96,11 @@ namespace PharmacyClient.ViewModels
                 }
 
                 // Создаем словарь для быстрого поиска сотрудника по LoginName (ключу таблицы EmployeeLogins)
+                // Используем нормализацию ключей (trim + lowercase) для надежного сравнения
                 var loginToEmployeeMap = new Dictionary<string, Employee>(StringComparer.OrdinalIgnoreCase);
                 foreach (var el in employeeLogins.Where(el => !string.IsNullOrEmpty(el.LoginName) && el.Employee != null))
                 {
-                    var key = el.LoginName.Trim();
+                    var key = el.LoginName.Trim().ToLower();
                     if (!loginToEmployeeMap.ContainsKey(key))
                     {
                         loginToEmployeeMap[key] = el.Employee!;
@@ -140,22 +141,25 @@ namespace PharmacyClient.ViewModels
                     System.Diagnostics.Debug.WriteLine($"  Пользователь БД: '{u.UserName}', Роль: '{u.RoleName}'");
                 }
 
-                // Объединяем информацию о пользователях с сотрудниками через LINQ
+                // Объединяем информацию о пользователях БД с сотрудниками через LINQ
                 foreach (var userInfo in userQuery)
                 {
                     System.Diagnostics.Debug.WriteLine($"Поиск сотрудника для пользователя: '{userInfo.UserName}'");
                     
                     // Пытаемся найти сотрудника по словарю из EmployeeLogins (по LoginName)
+                    // Нормализуем ключ поиска (trim + lowercase)
+                    var searchKey = userInfo.UserName.Trim().ToLower();
                     Employee? employee = null;
                     
-                    if (!loginToEmployeeMap.TryGetValue(userInfo.UserName, out employee))
+                    if (!loginToEmployeeMap.TryGetValue(searchKey, out employee))
                     {
-                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins (ключ '{userInfo.UserName}')");
+                        System.Diagnostics.Debug.WriteLine($"  Не найдено в словаре EmployeeLogins (ключ '{searchKey}')");
                         
                         // Если не нашли через EmployeeLogins, пробуем найти напрямую через EmployeeLogins table
+                        // Также нормализуем поиск
                         var directLogin = await _context.EmployeeLogins
                             .Include(el => el.Employee)
-                            .FirstOrDefaultAsync(el => el.LoginName == userInfo.UserName);
+                            .FirstOrDefaultAsync(el => el.LoginName.Trim().ToLower() == searchKey);
                         
                         if (directLogin != null && directLogin.Employee != null)
                         {
@@ -320,7 +324,7 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanDeleteUser))]
         private async Task DeleteUserAsync()
         {
             if (SelectedUser == null)
@@ -373,7 +377,12 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        [RelayCommand]
+        private bool CanDeleteUser()
+        {
+            return SelectedUser != null;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanResetPassword))]
         private async Task ResetPasswordAsync()
         {
             if (SelectedUser == null)
@@ -417,18 +426,28 @@ namespace PharmacyClient.ViewModels
             }
         }
 
+        private bool CanResetPassword()
+        {
+            return SelectedUser != null;
+        }
+
         [RelayCommand]
         private async Task RefreshAsync()
         {
             await LoadUserAccountsAsync();
         }
 
-        [RelayCommand(CanExecute = true)]
+        [RelayCommand(CanExecute = nameof(CanOpenCreateUserForm))]
         private void OpenCreateUserForm()
         {
             // Открываем диалог создания пользователя
             SelectedEmployeeId = null;
             NewLoginName = string.Empty;
+        }
+
+        private bool CanOpenCreateUserForm()
+        {
+            return true;
         }
 
         partial void OnSelectedUserChanged(UserAccountInfo? value)
