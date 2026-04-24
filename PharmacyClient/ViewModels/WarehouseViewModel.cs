@@ -26,8 +26,18 @@ namespace PharmacyClient.ViewModels
         [ObservableProperty]
         private StockMovement? _selectedMovement;
 
+        partial void OnSelectedMovementChanged(StockMovement? value)
+        {
+            DeleteCommand?.NotifyCanExecuteChanged();
+        }
+
         [ObservableProperty]
         private InventoryCheck? _selectedInventory;
+
+        partial void OnSelectedInventoryChanged(InventoryCheck? value)
+        {
+            DeleteCommand?.NotifyCanExecuteChanged();
+        }
 
         [ObservableProperty]
         private string _searchText = string.Empty;
@@ -49,6 +59,11 @@ namespace PharmacyClient.ViewModels
 
         [ObservableProperty]
         private int _activeTab;
+
+        partial void OnActiveTabChanged(int value)
+        {
+            DeleteCommand?.NotifyCanExecuteChanged();
+        }
 
         [ObservableProperty]
         private ObservableCollection<string> _movementTypeOptions = new() { "Все", "Приход", "Расход", "Списание", "Перемещение", "Инвентаризация" };
