@@ -245,70 +245,68 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(HasSelectedMovement))]
-        private async Task DeleteMovementAsync()
+        [RelayCommand(CanExecute = nameof(HasSelectedRecord))]
+        private async Task DeleteAsync()
         {
-            if (SelectedMovement == null) return;
-
-            var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить движение №{SelectedMovement.DocumentNumber}?",
-                "Подтверждение удаления",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.Yes)
+            // Определяем, какая вкладка активна и что выбрано
+            if (ActiveTab == 0 && SelectedMovement != null)
             {
-                try
-                {
-                    _context.StockMovements.Remove(SelectedMovement);
-                    await _context.SaveChangesAsync();
+                // Удаляем движение
+                var result = MessageBox.Show(
+                    $"Вы уверены, что хотите удалить движение №{SelectedMovement.DocumentNumber}?",
+                    "Подтверждение удаления",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
 
-                    StockMovements.Remove(SelectedMovement);
-                    MovementsCount = StockMovements.Count;
-                    SelectedMovement = null;
-                    StatusMessage = "Движение успешно удалено";
-                }
-                catch (Exception ex)
+                if (result == MessageBoxResult.Yes)
                 {
-                    StatusMessage = $"Ошибка удаления движения: {ex.Message}";
-                    MessageBox.Show($"Ошибка удаления движения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    try
+                    {
+                        _context.StockMovements.Remove(SelectedMovement);
+                        await _context.SaveChangesAsync();
+
+                        StockMovements.Remove(SelectedMovement);
+                        MovementsCount = StockMovements.Count;
+                        SelectedMovement = null;
+                        StatusMessage = "Движение успешно удалено";
+                    }
+                    catch (Exception ex)
+                    {
+                        StatusMessage = $"Ошибка удаления движения: {ex.Message}";
+                        MessageBox.Show($"Ошибка удаления движения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else if (ActiveTab == 1 && SelectedInventory != null)
+            {
+                // Удаляем инвентаризацию
+                var result = MessageBox.Show(
+                    $"Вы уверены, что хотите удалить инвентаризацию №{SelectedInventory.InventoryNumber}?",
+                    "Подтверждение удаления",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        _context.InventoryChecks.Remove(SelectedInventory);
+                        await _context.SaveChangesAsync();
+
+                        InventoryChecks.Remove(SelectedInventory);
+                        InventoriesCount = InventoryChecks.Count;
+                        SelectedInventory = null;
+                        StatusMessage = "Инвентаризация успешно удалена";
+                    }
+                    catch (Exception ex)
+                    {
+                        StatusMessage = $"Ошибка удаления инвентаризации: {ex.Message}";
+                        MessageBox.Show($"Ошибка удаления инвентаризации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
-        [RelayCommand(CanExecute = nameof(HasSelectedInventory))]
-        private async Task DeleteInventoryAsync()
-        {
-            if (SelectedInventory == null) return;
-
-            var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить инвентаризацию №{SelectedInventory.InventoryNumber}?",
-                "Подтверждение удаления",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    _context.InventoryChecks.Remove(SelectedInventory);
-                    await _context.SaveChangesAsync();
-
-                    InventoryChecks.Remove(SelectedInventory);
-                    InventoriesCount = InventoryChecks.Count;
-                    SelectedInventory = null;
-                    StatusMessage = "Инвентаризация успешно удалена";
-                }
-                catch (Exception ex)
-                {
-                    StatusMessage = $"Ошибка удаления инвентаризации: {ex.Message}";
-                    MessageBox.Show($"Ошибка удаления инвентаризации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private bool HasSelectedMovement() => SelectedMovement != null;
-
-        private bool HasSelectedInventory() => SelectedInventory != null;
+        private bool HasSelectedRecord() => (ActiveTab == 0 && SelectedMovement != null) || (ActiveTab == 1 && SelectedInventory != null);
     }
 }
