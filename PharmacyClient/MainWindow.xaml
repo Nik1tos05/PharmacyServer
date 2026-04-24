@@ -153,14 +153,19 @@
             </TabItem>
             
             <TabItem Header="Компоненты" x:Name="ComponentsTab">
-                <Grid Margin="10">
-                    <TextBlock Text="Раздел управления компонентами" FontSize="16"/>
-                </Grid>
+                <local:ComponentsView/>
             </TabItem>
             
             <TabItem Header="Рецепты" x:Name="PrescriptionsTab">
                 <Grid Margin="10">
-                    <TextBlock Text="Раздел управления рецептами" FontSize="16"/>
+                    <TabControl>
+                        <TabItem Header="Пациенты">
+                            <local:PatientsView/>
+                        </TabItem>
+                        <TabItem Header="Врачи">
+                            <local:DoctorsView/>
+                        </TabItem>
+                    </TabControl>
                 </Grid>
             </TabItem>
             
