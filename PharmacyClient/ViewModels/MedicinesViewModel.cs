@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -241,9 +242,18 @@ namespace PharmacyClient.ViewModels
             try
             {
                 await using var context = new PharmacyDbContext();
-                var medicineToDelete = await context.Medicines.FindAsync(SelectedMedicine.MedicineId);
+                var medicineToDelete = await context.Medicines
+                    .Include(m => m.MedicineCompositions)
+                    .FirstOrDefaultAsync(m => m.MedicineId == SelectedMedicine.MedicineId);
+                    
                 if (medicineToDelete != null)
                 {
+                    // Сначала удаляем связанные записи состава
+                    if (medicineToDelete.MedicineCompositions != null && medicineToDelete.MedicineCompositions.Any())
+                    {
+                        context.MedicineCompositions.RemoveRange(medicineToDelete.MedicineCompositions);
+                    }
+                    
                     context.Medicines.Remove(medicineToDelete);
                     await context.SaveChangesAsync();
                 }
@@ -257,7 +267,7 @@ namespace PharmacyClient.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", 
+                MessageBox.Show($"Ошибка удаления: {ex.Message}\n\nВнутренняя ошибка: {ex.InnerException?.Message}", "Ошибка", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
