@@ -48,13 +48,6 @@
                 <DataGridTextColumn Header="Дата заказа" Binding="{Binding OrderDate, StringFormat={}{0:dd.MM.yyyy}}" Width="90" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Рецепт" Binding="{Binding Prescription.PrescriptionNumber, TargetNullValue=''}" Width="100" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Пациент" Binding="{Binding Patient.LastName}" Width="120" IsReadOnly="True"/>
-                <DataGridComboBoxColumn Header="Препарат" 
-                                        ItemsSource="{Binding MedicinesList}" 
-                                        SelectedValueBinding="{Binding MedicineId, UpdateSourceTrigger=PropertyChanged}"
-                                        SelectedValuePath="MedicineId"
-                                        DisplayMemberPath="MedicineName"
-                                        Width="150"
-                                        IsReadOnly="False"/>
                 <DataGridTextColumn Header="Количество" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
                 <DataGridTextColumn Header="Цена" Binding="{Binding TotalPrice, StringFormat={}{0:C}}" Width="80" IsReadOnly="True"/>
                 <DataGridTemplateColumn Header="Статус" Width="120">

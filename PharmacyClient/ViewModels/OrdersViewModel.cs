@@ -38,9 +38,6 @@ namespace PharmacyClient.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _statusOptions = new() { "Все", "Новый", "В производстве", "Готов", "Выдан", "Отменен" };
 
-        [ObservableProperty]
-        private ObservableCollection<Medicine> _medicinesList = new();
-
         public OrdersViewModel()
         {
             _context = new PharmacyDbContext();
@@ -106,29 +103,13 @@ namespace PharmacyClient.ViewModels
         {
             try
             {
-                // Загружаем список лекарств если ещё не загружен
-                if (MedicinesList.Count == 0)
-                {
-                    await using var context = new PharmacyDbContext();
-                    var medicines = await context.Medicines.OrderBy(m => m.MedicineName).ToListAsync();
-                    
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        MedicinesList.Clear();
-                        foreach (var med in medicines)
-                        {
-                            MedicinesList.Add(med);
-                        }
-                    });
-                }
-
                 // Создаем новый заказ с данными по умолчанию
                 var newOrder = new Order
                 {
                     OrderNumber = $"ORD-{DateTime.Now:yyyyMMddHHmmss}",
                     OrderDate = DateTime.Now,
                     PatientId = 1, // Нужно будет выбрать пациента
-                    MedicineId = MedicinesList.FirstOrDefault()?.MedicineId ?? 0,
+                    MedicineId = 1,
                     Quantity = 1,
                     TotalPrice = 0,
                     OrderStatus = "Новый",
@@ -152,7 +133,7 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(HasSelectedOrder))]
-        private async Task DeleteOrderAsync()
+        private void DeleteOrder()
         {
             if (SelectedOrder == null) return;
 
@@ -164,21 +145,35 @@ namespace PharmacyClient.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                try
+                Task.Run(async () =>
                 {
-                    _context.Orders.Remove(SelectedOrder);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        await using var context = new PharmacyDbContext();
+                        var orderToDelete = await context.Orders.FindAsync(SelectedOrder.OrderId);
+                        if (orderToDelete != null)
+                        {
+                            context.Orders.Remove(orderToDelete);
+                            await context.SaveChangesAsync();
 
-                    Orders.Remove(SelectedOrder);
-                    TotalCount = Orders.Count;
-                    SelectedOrder = null;
-                    StatusMessage = "Заказ успешно удален";
-                }
-                catch (Exception ex)
-                {
-                    StatusMessage = $"Ошибка удаления заказа: {ex.Message}";
-                    MessageBox.Show($"Ошибка удаления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                Orders.Remove(SelectedOrder);
+                                TotalCount = Orders.Count;
+                                SelectedOrder = null;
+                                StatusMessage = "Заказ успешно удален";
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            StatusMessage = $"Ошибка удаления заказа: {ex.Message}";
+                            MessageBox.Show($"Ошибка удаления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
+                    }
+                });
             }
         }
 
