@@ -102,10 +102,26 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
-        private void AddOrder()
+        private async Task AddOrderAsync()
         {
             try
             {
+                // Загружаем список лекарств если ещё не загружен
+                if (MedicinesList.Count == 0)
+                {
+                    await using var context = new PharmacyDbContext();
+                    var medicines = await context.Medicines.OrderBy(m => m.MedicineName).ToListAsync();
+                    
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MedicinesList.Clear();
+                        foreach (var med in medicines)
+                        {
+                            MedicinesList.Add(med);
+                        }
+                    });
+                }
+
                 // Создаем новый заказ с данными по умолчанию
                 var newOrder = new Order
                 {
@@ -120,8 +136,9 @@ namespace PharmacyClient.ViewModels
                     ModifiedDate = DateTime.Now
                 };
 
-                _context.Orders.Add(newOrder);
-                _context.SaveChanges();
+                await using var context2 = new PharmacyDbContext();
+                context2.Orders.Add(newOrder);
+                await context2.SaveChangesAsync();
 
                 Orders.Insert(0, newOrder);
                 TotalCount = Orders.Count;
