@@ -44,7 +44,7 @@ namespace PharmacyClient.Views
                         var medicine = await context.Medicines.FindAsync(editedOrder.MedicineId);
                         if (medicine != null)
                         {
-                            existingOrder.TotalPrice = medicine.Price * editedOrder.Quantity;
+                            existingOrder.TotalPrice = medicine.SalePrice * editedOrder.Quantity;
                         }
                         
                         existingOrder.ModifiedDate = DateTime.Now;
