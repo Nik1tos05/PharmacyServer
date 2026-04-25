@@ -2,33 +2,37 @@
 # Build artifacts
 bin/
 obj/
-*.dll
 *.exe
+*.dll
 *.pdb
-*.config
 *.nupkg
+*.snupkg
 
 # Dependencies
 packages/
 node_modules/
-lib/
+vendor/
 
 # Logs
 *.log
 
-# User-specific files
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Environment specific settings
-.env
-.env.local
-*.local
-
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# User-specific files
+.vs/
+.idea/
+*.userprefs
+*.suo
+*.user
+*.aps
+
+# Configuration files
+app.config
+web.config
+
+# Compiled source
+*.compiled
+*.cache
 ```

@@ -132,10 +132,14 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(HasSelectedOrder))]
-        private void DeleteOrder()
+        [RelayCommand]
+        private async Task DeleteOrderAsync()
         {
-            if (SelectedOrder == null) return;
+            if (SelectedOrder == null) 
+            {
+                MessageBox.Show("Выберите заказ для удаления", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"Вы уверены, что хотите удалить заказ №{SelectedOrder.OrderNumber}?",
@@ -145,38 +149,33 @@ namespace PharmacyClient.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                Task.Run(async () =>
+                try
                 {
-                    try
+                    await using var context = new PharmacyDbContext();
+                    var orderToDelete = await context.Orders.FindAsync(SelectedOrder.OrderId);
+                    if (orderToDelete != null)
                     {
-                        await using var context = new PharmacyDbContext();
-                        var orderToDelete = await context.Orders.FindAsync(SelectedOrder.OrderId);
-                        if (orderToDelete != null)
-                        {
-                            context.Orders.Remove(orderToDelete);
-                            await context.SaveChangesAsync();
+                        context.Orders.Remove(orderToDelete);
+                        await context.SaveChangesAsync();
 
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                Orders.Remove(SelectedOrder);
-                                TotalCount = Orders.Count;
-                                SelectedOrder = null;
-                                StatusMessage = "Заказ успешно удален";
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            StatusMessage = $"Ошибка удаления заказа: {ex.Message}";
-                            MessageBox.Show($"Ошибка удаления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Orders.Remove(SelectedOrder);
+                            TotalCount = Orders.Count;
+                            SelectedOrder = null;
+                            StatusMessage = "Заказ успешно удален";
                         });
                     }
-                });
+                }
+                catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        StatusMessage = $"Ошибка удаления заказа: {ex.Message}";
+                        MessageBox.Show($"Ошибка удаления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                }
             }
         }
-
-        private bool HasSelectedOrder() => SelectedOrder != null;
     }
 }
