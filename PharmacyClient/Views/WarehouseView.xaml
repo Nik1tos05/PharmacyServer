@@ -56,7 +56,6 @@
                         <DataGridTextColumn Header="Документ" Binding="{Binding DocumentNumber}" Width="100"/>
                         <DataGridTextColumn Header="Тип" Binding="{Binding MovementType}" Width="100"/>
                         <DataGridTextColumn Header="Тип объекта" Binding="{Binding ItemType}" Width="80"/>
-                        <DataGridTextColumn Header="ID объекта" Binding="{Binding ItemId}" Width="70"/>
                         <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="80"/>
                         <DataGridTextColumn Header="Ед. изм." Binding="{Binding Unit.UnitName}" Width="80"/>
                         <DataGridTextColumn Header="Пред. остаток" Binding="{Binding PreviousStock}" Width="90"/>
