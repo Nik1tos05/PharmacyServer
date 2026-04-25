@@ -39,7 +39,14 @@ namespace PharmacyClient.Views
                         existingOrder.MedicineId = editedOrder.MedicineId;
                         existingOrder.Quantity = editedOrder.Quantity;
                         existingOrder.OrderStatus = editedOrder.OrderStatus;
-                        existingOrder.TotalPrice = editedOrder.TotalPrice;
+                        
+                        // Пересчитываем общую цену на основе количества и цены лекарства
+                        var medicine = await context.Medicines.FindAsync(editedOrder.MedicineId);
+                        if (medicine != null)
+                        {
+                            existingOrder.TotalPrice = medicine.Price * editedOrder.Quantity;
+                        }
+                        
                         existingOrder.ModifiedDate = DateTime.Now;
                         
                         await context.SaveChangesAsync();
