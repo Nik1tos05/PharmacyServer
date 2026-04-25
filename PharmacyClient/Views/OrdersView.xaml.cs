@@ -36,6 +36,7 @@ namespace PharmacyClient.Views
                         existingOrder.OrderStatus = editedOrder.OrderStatus;
                         existingOrder.ReadyDate = editedOrder.ReadyDate;
                         existingOrder.PickupDate = editedOrder.PickupDate;
+                        existingOrder.PrescriptionId = editedOrder.PrescriptionId;
                         
                         existingOrder.ModifiedDate = DateTime.Now;
                         
