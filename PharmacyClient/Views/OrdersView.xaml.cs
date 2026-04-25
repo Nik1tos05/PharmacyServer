@@ -50,6 +50,7 @@ namespace PharmacyClient.Views
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    e.Cancel = true; // Отменяем закрытие режима редактирования при ошибке
                 }
             }
         }

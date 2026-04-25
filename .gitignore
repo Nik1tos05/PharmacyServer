@@ -1,1 +1,33 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a source code file (.xaml) which should not be added to .gitignore.
+```
+# Build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.nupkg
+*.snupkg
+
+# Dependencies
+packages/
+node_modules/
+
+# Logs
+*.log
+
+# User-specific files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Environment specific settings
+.env
+.env.local
+*.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
