@@ -1,45 +1,45 @@
-```
+```gitignore
 # Build artifacts
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
-# Dependencies
-packages/
 bin/
 obj/
-
-# Logs and temp files
+*.exe
+*.dll
+*.pdb
+*.userprefs
+*.cache
+*.compiled
 *.log
 *.tmp
 *.swp
+*.swo
+
+# Dependencies
+packages/
+node_modules/
+.nuget/
+.npm/
+.yarn/
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
+!.env.example
 
 # Editors
 .vscode/
 .idea/
 *.user
 *.userosscache
-*.suo
-*.csproj.user
+*.sln.docstates
 
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Test and coverage
+# Test results
+TestResults/
 coverage/
-htmlcov/
 *.coverage
-.coverage.*
-.nyc_output/
-istanbul/
 ```

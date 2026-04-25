@@ -44,9 +44,11 @@ namespace PharmacyClient.ViewModels
         public OrdersViewModel()
         {
             _context = new PharmacyDbContext();
+            LoadOrdersCommand = new AsyncRelayCommand(LoadOrdersAsync);
         }
 
-        [RelayCommand]
+        public IAsyncRelayCommand LoadOrdersCommand { get; }
+
         private async Task LoadOrdersAsync()
         {
             IsLoading = true;

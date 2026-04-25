@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using PharmacyClient.Data;
 using PharmacyClient.Models;
@@ -43,7 +44,7 @@ namespace PharmacyClient.Views
                         
                         await context.SaveChangesAsync();
                         viewModel.StatusMessage = "Заказ обновлен";
-                        await viewModel.LoadOrdersAsync();
+                        await viewModel.LoadOrdersCommand.ExecuteAsync(null);
                     }
                 }
                 catch (Exception ex)
