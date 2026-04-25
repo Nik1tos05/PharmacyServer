@@ -1,4 +1,8 @@
 using System.Windows.Controls;
+using Microsoft.EntityFrameworkCore;
+using PharmacyClient.Data;
+using PharmacyClient.Models;
+using System.Linq;
 
 namespace PharmacyClient.Views
 {
@@ -7,6 +11,71 @@ namespace PharmacyClient.Views
         public OrdersView()
         {
             InitializeComponent();
+        }
+
+        private async void OrdersGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            // Загружаем список лекарств при начале редактирования
+            if (DataContext is ViewModels.OrdersViewModel viewModel)
+            {
+                await LoadMedicinesAsync(viewModel);
+            }
+        }
+
+        private async void OrdersGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            // Сохраняем изменения при завершении редактирования строки
+            if (e.Row.Item is Order editedOrder && DataContext is ViewModels.OrdersViewModel viewModel)
+            {
+                try
+                {
+                    await using var context = new PharmacyDbContext();
+                    
+                    // Обновляем заказ в базе данных
+                    var existingOrder = await context.Orders.FindAsync(editedOrder.OrderId);
+                    if (existingOrder != null)
+                    {
+                        existingOrder.MedicineId = editedOrder.MedicineId;
+                        existingOrder.Quantity = editedOrder.Quantity;
+                        existingOrder.OrderStatus = editedOrder.OrderStatus;
+                        existingOrder.TotalPrice = editedOrder.TotalPrice;
+                        existingOrder.ModifiedDate = DateTime.Now;
+                        
+                        await context.SaveChangesAsync();
+                        viewModel.StatusMessage = "Заказ обновлен";
+                        await viewModel.LoadOrdersAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async Task LoadMedicinesAsync(ViewModels.OrdersViewModel viewModel)
+        {
+            try
+            {
+                await using var context = new PharmacyDbContext();
+                var medicines = await context.Medicines.OrderBy(m => m.MedicineName).ToListAsync();
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    viewModel.MedicinesList.Clear();
+                    foreach (var med in medicines)
+                    {
+                        viewModel.MedicinesList.Add(med);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    viewModel.StatusMessage = $"Ошибка загрузки лекарств: {ex.Message}";
+                });
+            }
         }
     }
 }

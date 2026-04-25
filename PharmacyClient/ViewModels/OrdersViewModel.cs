@@ -38,6 +38,9 @@ namespace PharmacyClient.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _statusOptions = new() { "Все", "Новый", "В производстве", "Готов", "Выдан", "Отменен" };
 
+        [ObservableProperty]
+        private ObservableCollection<Medicine> _medicinesList = new();
+
         public OrdersViewModel()
         {
             _context = new PharmacyDbContext();
@@ -99,18 +102,38 @@ namespace PharmacyClient.ViewModels
         [RelayCommand]
         private void AddOrder()
         {
-            MessageBox.Show("Функция добавления заказа будет реализована через форму создания заказа по рецепту.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                // Создаем новый заказ с данными по умолчанию
+                var newOrder = new Order
+                {
+                    OrderNumber = $"ORD-{DateTime.Now:yyyyMMddHHmmss}",
+                    OrderDate = DateTime.Now,
+                    PatientId = 1, // Нужно будет выбрать пациента
+                    MedicineId = MedicinesList.FirstOrDefault()?.MedicineId ?? 0,
+                    Quantity = 1,
+                    TotalPrice = 0,
+                    OrderStatus = "Новый",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+
+                _context.Orders.Add(newOrder);
+                _context.SaveChanges();
+
+                Orders.Insert(0, newOrder);
+                TotalCount = Orders.Count;
+                StatusMessage = "Заказ успешно добавлен. Нажмите на строку для редактирования.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Ошибка добавления заказа: {ex.Message}";
+                MessageBox.Show($"Ошибка добавления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand(CanExecute = nameof(HasSelectedOrder))]
-        private void EditOrder()
-        {
-            if (SelectedOrder == null) return;
-            MessageBox.Show($"Редактирование заказа №{SelectedOrder.OrderNumber}", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        [RelayCommand(CanExecute = nameof(HasSelectedOrder))]
-        private void DeleteOrder()
+        private async Task DeleteOrderAsync()
         {
             if (SelectedOrder == null) return;
 
@@ -122,7 +145,21 @@ namespace PharmacyClient.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                MessageBox.Show("Функция удаления будет реализована с проверкой прав доступа.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    _context.Orders.Remove(SelectedOrder);
+                    await _context.SaveChangesAsync();
+
+                    Orders.Remove(SelectedOrder);
+                    TotalCount = Orders.Count;
+                    SelectedOrder = null;
+                    StatusMessage = "Заказ успешно удален";
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"Ошибка удаления заказа: {ex.Message}";
+                    MessageBox.Show($"Ошибка удаления заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
