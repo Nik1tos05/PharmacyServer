@@ -38,17 +38,35 @@
                   ItemsSource="{Binding Orders}" 
                   SelectedItem="{Binding SelectedOrder}"
                   AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  SelectionMode="Single">
+                  IsReadOnly="False"
+                  CanUserAddRows="True"
+                  SelectionMode="Single"
+                  BeginningEdit="OrdersGrid_BeginningEdit"
+                  RowEditEnding="OrdersGrid_RowEditEnding">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="№ заказа" Binding="{Binding OrderNumber}" Width="100"/>
                 <DataGridTextColumn Header="Дата заказа" Binding="{Binding OrderDate, StringFormat={}{0:dd.MM.yyyy}}" Width="90"/>
+                <DataGridTextColumn Header="Рецепт" Binding="{Binding Prescription.PrescriptionNumber, TargetNullValue=''}" Width="100"/>
                 <DataGridTextColumn Header="Пациент" Binding="{Binding Patient.LastName}" Width="120"/>
-                <DataGridTextColumn Header="Лекарство" Binding="{Binding Medicine.MedicineName}" Width="150"/>
-                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="80"/>
+                <DataGridComboBoxColumn Header="Препарат" SelectedItemBinding="{Binding MedicineId}" Width="150">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.MedicinesList}"/>
+                            <Setter Property="DisplayMemberPath" Value="MedicineName"/>
+                            <Setter Property="SelectedValuePath" Value="MedicineId"/>
+                        </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="ComboBox">
+                            <Setter Property="ItemsSource" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.MedicinesList}"/>
+                            <Setter Property="DisplayMemberPath" Value="MedicineName"/>
+                            <Setter Property="SelectedValuePath" Value="MedicineId"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
                 <DataGridTextColumn Header="Цена" Binding="{Binding TotalPrice, StringFormat={}{0:C}}" Width="80"/>
-                <DataGridTextColumn Header="Статус" Binding="{Binding OrderStatus}" Width="100"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding OrderStatus, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
                 <DataGridTextColumn Header="Готовность" Binding="{Binding ReadyDate, StringFormat={}{0:dd.MM.yyyy}, TargetNullValue=''}" Width="90"/>
                 <DataGridTextColumn Header="Выдан" Binding="{Binding PickupDate, StringFormat={}{0:dd.MM.yyyy}, TargetNullValue=''}" Width="90"/>
             </DataGrid.Columns>
