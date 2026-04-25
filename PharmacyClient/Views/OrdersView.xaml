@@ -53,10 +53,18 @@
                                         SelectedValueBinding="{Binding MedicineId, UpdateSourceTrigger=PropertyChanged}"
                                         SelectedValuePath="MedicineId"
                                         DisplayMemberPath="MedicineName"
-                                        Width="150"/>
+                                        Width="150"
+                                        IsReadOnly="False"/>
                 <DataGridTextColumn Header="Количество" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
-                <DataGridTextColumn Header="Цена" Binding="{Binding TotalPrice, StringFormat={}{0:C}}" Width="80"/>
-                <DataGridTextColumn Header="Статус" Binding="{Binding OrderStatus, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                <DataGridTextColumn Header="Цена" Binding="{Binding TotalPrice, StringFormat={}{0:C}}" Width="80" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Статус" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.StatusOptions}"
+                                      SelectedItem="{Binding OrderStatus, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Готовность" Binding="{Binding ReadyDate, StringFormat={}{0:dd.MM.yyyy}, TargetNullValue=''}" Width="90"/>
                 <DataGridTextColumn Header="Выдан" Binding="{Binding PickupDate, StringFormat={}{0:dd.MM.yyyy}, TargetNullValue=''}" Width="90"/>
             </DataGrid.Columns>
