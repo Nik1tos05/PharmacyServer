@@ -205,10 +205,6 @@ namespace PharmacyClient
             if (result == MessageBoxResult.Yes)
             {
                 App.CurrentUserSession = null;
-                
-                var loginWindow = new Views.LoginView();
-                loginWindow.Show();
-                Close();
             }
         }
 
