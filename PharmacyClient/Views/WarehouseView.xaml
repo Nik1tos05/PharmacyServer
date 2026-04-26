@@ -31,9 +31,7 @@
                     Padding="10,5" Margin="0,0,5,0"/>
             <Button Content="Обновить все" Command="{Binding RefreshAllCommand}" 
                     Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="Добавить движение" Command="{Binding AddMovementCommand}" 
-                    Padding="10,5" Margin="0,0,5,0"/>
-            <Button Content="Создать инвентаризацию" Command="{Binding AddInventoryCommand}" 
+            <Button Content="Добавить" Command="{Binding AddCommand}" 
                     Padding="10,5" Margin="0,0,5,0"/>
             <Button Content="Удалить" Command="{Binding DeleteCommand}" 
                     Padding="10,5"/>
