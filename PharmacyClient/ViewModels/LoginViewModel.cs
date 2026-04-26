@@ -36,7 +36,7 @@ namespace PharmacyClient.ViewModels
 
         public LoginViewModel()
         {
-            LoadSavedCredentials();
+            _ = LoadSavedCredentialsAsync();
         }
 
         partial void OnPasswordChanged(string value)
@@ -49,7 +49,7 @@ namespace PharmacyClient.ViewModels
             ErrorMessage = string.Empty;
         }
 
-        private void LoadSavedCredentials()
+        private async Task LoadSavedCredentialsAsync()
         {
             try
             {
@@ -59,9 +59,9 @@ namespace PharmacyClient.ViewModels
                     await using var stream = store.OpenFile(CredentialsFileName, FileMode.Open);
                     using var reader = new StreamReader(stream, Encoding.UTF8);
                     
-                    var login = reader.ReadLine();
-                    var password = reader.ReadLine();
-                    var rememberMe = reader.ReadLine();
+                    var login = await reader.ReadLineAsync();
+                    var password = await reader.ReadLineAsync();
+                    var rememberMe = await reader.ReadLineAsync();
 
                     if (!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password))
                     {
@@ -77,19 +77,20 @@ namespace PharmacyClient.ViewModels
             }
         }
 
-        private void SaveCredentials()
+        private async Task SaveCredentialsAsync()
         {
             try
             {
                 using var store = IsolatedStorageFile.GetUserStoreForAssembly();
-                await using var stream = store.CreateFile(CredentialsFileName);
-                using var writer = new StreamWriter(stream, Encoding.UTF8);
-
+                
                 if (RememberMe)
                 {
-                    writer.WriteLine(Login);
-                    writer.WriteLine(Password);
-                    writer.WriteLine("true");
+                    await using var stream = store.CreateFile(CredentialsFileName);
+                    using var writer = new StreamWriter(stream, Encoding.UTF8);
+
+                    await writer.WriteLineAsync(Login);
+                    await writer.WriteLineAsync(Password);
+                    await writer.WriteLineAsync("true");
                 }
                 else
                 {
@@ -215,7 +216,7 @@ namespace PharmacyClient.ViewModels
                 App.SetCurrentUserSession(session);
 
                 // Сохраняем учетные данные, если выбрана опция "Запомнить меня"
-                SaveCredentials();
+                await SaveCredentialsAsync();
 
                 // Открываем главное окно
                 var mainWindow = new MainWindow();
