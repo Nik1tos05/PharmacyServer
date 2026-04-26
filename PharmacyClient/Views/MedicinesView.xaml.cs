@@ -34,10 +34,15 @@ namespace PharmacyClient.Views
         {
             if (e.Row.Item is Medicine editedMedicine && editedMedicine.MedicineId > 0)
             {
-                // Валидация: если название пустое, заменяем на "Новое лекарство"
+                // Валидация: если название пустое или содержит только пробелы, 
+                // автоматически заменяем на "Новое лекарство"
                 if (string.IsNullOrWhiteSpace(editedMedicine.MedicineName))
                 {
                     editedMedicine.MedicineName = "Новое лекарство";
+                }
+                else
+                {
+                    editedMedicine.MedicineName = editedMedicine.MedicineName.Trim();
                 }
 
                 try
@@ -47,7 +52,7 @@ namespace PharmacyClient.Views
                     
                     if (medicineToUpdate != null)
                     {
-                        medicineToUpdate.MedicineName = editedMedicine.MedicineName.Trim();
+                        medicineToUpdate.MedicineName = editedMedicine.MedicineName;
                         medicineToUpdate.Description = editedMedicine.Description;
                         medicineToUpdate.CriticalNorm = editedMedicine.CriticalNorm;
                         medicineToUpdate.CurrentStock = editedMedicine.CurrentStock;
@@ -68,8 +73,16 @@ namespace PharmacyClient.Views
                     MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", 
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     e.Cancel = true;
+                    
+                    // Откатываем изменение к старому значению
+                    if (_editingMedicine != null)
+                    {
+                        editedMedicine.MedicineName = _editingMedicine.MedicineName;
+                    }
                 }
             }
+            
+            _editingMedicine = null;
         }
     }
 }
