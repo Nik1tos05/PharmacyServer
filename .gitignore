@@ -1,1 +1,38 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a source code file (.xaml.cs) which should not be ignored.
+# Compiled and build artifacts
+*.exe
+*.dll
+*.so
+*.a
+*.obj
+*.out
+bin/
+obj/
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+packages/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.userprefs
+
+# Build outputs
+Debug/
+Release/
+Build/
+Output/
+dist/
+publish/
