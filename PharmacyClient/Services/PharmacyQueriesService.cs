@@ -456,7 +456,6 @@ public class PharmacyQueriesService
 
         return new DetailedMedicineInfo
         {
-            MedicineId = medicine.MedicineId,
             MedicineName = medicine.MedicineName,
             MedicineTypeName = medicine.MedicineTypeName,
             CategoryName = medicine.CategoryName,
@@ -488,7 +487,6 @@ public class PharmacyQueriesService
                     select new ExpiredMedicineInfo
                     {
                         ItemType = inventoryDetail.ItemType,
-                        ItemId = inventoryDetail.ItemId,
                         ExpirationDate = inventoryDetail.ExpirationDate,
                         ExpectedQuantity = inventoryDetail.ExpectedQuantity,
                         ActualQuantity = inventoryDetail.ActualQuantity,
@@ -510,7 +508,6 @@ public class PharmacyQueriesService
                     select new ShortageInfo
                     {
                         ItemType = inventoryDetail.ItemType,
-                        ItemId = inventoryDetail.ItemId,
                         ExpectedQuantity = inventoryDetail.ExpectedQuantity,
                         ActualQuantity = inventoryDetail.ActualQuantity,
                         ShortageAmount = Math.Abs((decimal)inventoryDetail.Difference),
@@ -531,7 +528,6 @@ public class PharmacyQueriesService
             .Where(p => p.PrescriptionId == prescriptionId)
             .Select(p => new
             {
-                p.PrescriptionId,
                 p.PrescriptionNumber,
                 PatientName = $"{p.Patient.LastName} {p.Patient.FirstName} {p.Patient.Patronymic}",
                 DoctorName = $"{p.Doctor.LastName} {p.Doctor.FirstName} {p.Doctor.Patronymic}",
@@ -555,7 +551,6 @@ public class PharmacyQueriesService
 
         return new PrescriptionInfo
         {
-            PrescriptionId = prescription.PrescriptionId,
             PrescriptionNumber = prescription.PrescriptionNumber,
             PatientName = prescription.PatientName,
             DoctorName = prescription.DoctorName,

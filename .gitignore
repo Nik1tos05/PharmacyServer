@@ -1,14 +1,14 @@
-```
 # Compiled and build artifacts
-*.exe
-*.dll
-*.so
-*.o
-*.obj
-*.out
-*.class
 *.pyc
 __pycache__/
+*.o
+*.obj
+*.dll
+*.so
+*.exe
+*.class
+*.out
+*.a
 
 # Dependencies
 node_modules/
@@ -16,17 +16,20 @@ venv/
 .venv/
 .env
 .env.local
-*.env.*
+.env.*
 
 # Build directories
 dist/
 build/
 target/
-.mypy_cache/
-.pytest_cache/
-.coverage
-coverage/
-htmlcov/
+bin/
+obj/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
 
 # Editors
 .vscode/
@@ -37,19 +40,64 @@ htmlcov/
 # System files
 .DS_Store
 Thumbs.db
-*.tmp
-*.log
 
-# Package management
-.gradle/
-.npm/
-.yarn/
-bower_components/
+# Python specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+htmlcov/
+coverage/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.nox/
 
-# OS generated files
-*.bak
-*~
-.DS_Store?
-ehthumbs.db
-Icon?
-```
+# .NET specific
+bin/
+obj/
+*.userprefs
+*.pidb
+*.sln.docstates
+*.userosscache
+*.suo
+*.user
+.vs/
+
+# General compiled files
+*.dll
+*.exe
+*.out
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.class
+
+# Archives
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
