@@ -7,12 +7,19 @@
 *.out
 bin/
 obj/
+Debug/
+Release/
 
 # Dependencies
+packages/
 node_modules/
 venv/
 .venv/
-packages/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
 
 # Logs and temp files
 *.log
@@ -29,10 +36,14 @@ packages/
 .idea/
 *.userprefs
 
+# OS generated files
+.DS_Store
+Thumbs.db
+
 # Build outputs
-Debug/
-Release/
-Build/
-Output/
 dist/
-publish/
+build/
+out/
+coverage/
+htmlcov/
+.coverage
