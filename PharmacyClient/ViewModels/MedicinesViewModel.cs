@@ -245,7 +245,7 @@ namespace PharmacyClient.ViewModels
                 
                 // Проверяем существование хранимой процедуры
                 var procedureExists = await context.Database.SqlQueryRaw<int>(
-                    "SELECT COUNT(*) FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')")
+                    "SELECT COUNT(*) AS [Value] FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')")
                     .FirstOrDefaultAsync();
                 
                 if (procedureExists > 0)
