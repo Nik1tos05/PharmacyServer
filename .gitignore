@@ -1,70 +1,49 @@
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.dll
-*.exe
-*.so
-*.a
-*.class
-*.out
-
-# Dependencies
-.venv/
-venv/
-node_modules/
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
-dist/
-build/
-
-# Logs and temp files
-*.log
-*.tmp
 *.swp
-*.swo
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
+nupkg/
 
-# Environment
-.env
-.env.local
-.env.*
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
 
-# Editors
-.vscode/
+# Rider
 .idea/
 
-# System files
-.DS_Store
-Thumbs.db
+# Visual Studio
+.vs/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
+# Fleet
+.fleet/
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Code Rush
+.cr/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Node.js build artifacts
+node_modules/
+package-lock.json
+package.json

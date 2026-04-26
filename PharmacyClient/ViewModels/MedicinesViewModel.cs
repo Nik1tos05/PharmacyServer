@@ -261,9 +261,9 @@ namespace PharmacyClient.ViewModels
                     try
                     {
                         // Сначала удаляем связанные записи из состава лекарств
-                        var compositionRecords = context.MedicineComposition
+                        var compositionRecords = context.MedicineCompositions
                             .Where(mc => mc.MedicineId == SelectedMedicine.MedicineId);
-                        context.MedicineComposition.RemoveRange(compositionRecords);
+                        context.MedicineCompositions.RemoveRange(compositionRecords);
                         await context.SaveChangesAsync();
                         
                         // Затем удаляем само лекарство
