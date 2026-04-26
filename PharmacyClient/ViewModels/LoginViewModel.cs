@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.IsolatedStorage;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,6 +17,7 @@ namespace PharmacyClient.ViewModels
     {
         // Строка подключения по умолчанию (будет использоваться для проверки логина/пароля)
         private const string DefaultConnectionString = "Server=localhost;Database=PharmacyDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        private const string CredentialsFileName = "credentials.dat";
 
         [ObservableProperty]
         private string _login = string.Empty;
@@ -32,6 +36,7 @@ namespace PharmacyClient.ViewModels
 
         public LoginViewModel()
         {
+            LoadSavedCredentials();
         }
 
         partial void OnPasswordChanged(string value)
@@ -42,6 +47,63 @@ namespace PharmacyClient.ViewModels
         partial void OnLoginChanged(string value)
         {
             ErrorMessage = string.Empty;
+        }
+
+        private void LoadSavedCredentials()
+        {
+            try
+            {
+                using var store = IsolatedStorageFile.GetUserStoreForAssembly();
+                if (store.FileExists(CredentialsFileName))
+                {
+                    await using var stream = store.OpenFile(CredentialsFileName, FileMode.Open);
+                    using var reader = new StreamReader(stream, Encoding.UTF8);
+                    
+                    var login = reader.ReadLine();
+                    var password = reader.ReadLine();
+                    var rememberMe = reader.ReadLine();
+
+                    if (!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password))
+                    {
+                        Login = login;
+                        Password = password;
+                        RememberMe = rememberMe == "true";
+                    }
+                }
+            }
+            catch
+            {
+                // Если не удалось загрузить, просто оставляем поля пустыми
+            }
+        }
+
+        private void SaveCredentials()
+        {
+            try
+            {
+                using var store = IsolatedStorageFile.GetUserStoreForAssembly();
+                await using var stream = store.CreateFile(CredentialsFileName);
+                using var writer = new StreamWriter(stream, Encoding.UTF8);
+
+                if (RememberMe)
+                {
+                    writer.WriteLine(Login);
+                    writer.WriteLine(Password);
+                    writer.WriteLine("true");
+                }
+                else
+                {
+                    // Если галочка снята, удаляем файл с данными
+                    if (store.FileExists(CredentialsFileName))
+                    {
+                        store.DeleteFile(CredentialsFileName);
+                    }
+                }
+            }
+            catch
+            {
+                // Если не удалось сохранить, просто игнорируем ошибку
+            }
         }
 
         [RelayCommand]
@@ -151,6 +213,9 @@ namespace PharmacyClient.ViewModels
                 };
 
                 App.SetCurrentUserSession(session);
+
+                // Сохраняем учетные данные, если выбрана опция "Запомнить меня"
+                SaveCredentials();
 
                 // Открываем главное окно
                 var mainWindow = new MainWindow();
