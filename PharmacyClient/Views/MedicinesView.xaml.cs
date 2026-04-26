@@ -34,6 +34,15 @@ namespace PharmacyClient.Views
         {
             if (e.Row.Item is Medicine editedMedicine && editedMedicine.MedicineId > 0)
             {
+                // Валидация: название не должно быть пустым
+                if (string.IsNullOrWhiteSpace(editedMedicine.MedicineName))
+                {
+                    MessageBox.Show("Название лекарства не может быть пустым!", "Ошибка валидации", 
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    e.Cancel = true;
+                    return;
+                }
+
                 try
                 {
                     await using var context = new PharmacyDbContext();
@@ -41,7 +50,7 @@ namespace PharmacyClient.Views
                     
                     if (medicineToUpdate != null)
                     {
-                        medicineToUpdate.MedicineName = editedMedicine.MedicineName;
+                        medicineToUpdate.MedicineName = editedMedicine.MedicineName.Trim();
                         medicineToUpdate.Description = editedMedicine.Description;
                         medicineToUpdate.CriticalNorm = editedMedicine.CriticalNorm;
                         medicineToUpdate.CurrentStock = editedMedicine.CurrentStock;

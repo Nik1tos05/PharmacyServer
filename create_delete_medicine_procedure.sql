@@ -28,7 +28,7 @@ BEGIN
 
         -- 2. Затем удаляем само лекарство
         DELETE FROM dbo.Medicines
-        WHERE Id = @MedicineId;
+        WHERE MedicineId = @MedicineId;
 
         COMMIT TRANSACTION;
 
