@@ -54,8 +54,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Поиск -->
@@ -82,24 +80,15 @@
                             Margin="5,0,0,0"/>
                 </Grid>
 
-                <!-- Фильтр по категории -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0">
-                    <TextBlock Text="Категория:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <ComboBox ItemsSource="{Binding Categories}"
-                              SelectedItem="{Binding FilterCategory}"
-                              Width="150"
-                              Padding="5"/>
-                </StackPanel>
-
                 <!-- Кнопка очистки -->
-                <Button Grid.Column="2"
+                <Button Grid.Column="1"
                         Content="Сбросить фильтры" 
                         Command="{Binding ClearSearchCommand}"
                         Padding="15,5"
                         Margin="20,0,0,0"/>
                 
                 <!-- Статус -->
-                <TextBlock Grid.Column="3"
+                <TextBlock Grid.Column="2"
                            Text="{Binding StatusMessage}"
                            VerticalAlignment="Center"
                            Margin="20,0,0,0"
