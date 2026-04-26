@@ -37,7 +37,6 @@ public class PharmacyQueriesService
                     join patient in _context.Patients on order.PatientId equals patient.PatientId
                     select new PatientInfo
                     {
-                        PatientId = patient.PatientId,
                         FullName = $"{patient.LastName} {patient.FirstName} {patient.Patronymic}".Trim(),
                         Phone = patient.Phone,
                         Address = patient.Address,
@@ -68,7 +67,6 @@ public class PharmacyQueriesService
                     where categoryId == null || medicine.CategoryId == categoryId
                     select new PatientWaitingInfo
                     {
-                        PatientId = patient.PatientId,
                         FullName = $"{patient.LastName} {patient.FirstName} {patient.Patronymic}".Trim(),
                         Phone = patient.Phone,
                         Address = patient.Address,
@@ -95,15 +93,13 @@ public class PharmacyQueriesService
                     where order.OrderStatus == "Выполнен" || order.OrderStatus == "Выдан"
                     join medicine in _context.Medicines on order.MedicineId equals medicine.MedicineId
                     where categoryId == null || medicine.CategoryId == categoryId
-                    group order by new { medicine.MedicineId, medicine.MedicineName, medicine.CategoryId } into g
+                    group order by new { medicine.MedicineName } into g
                     orderby g.Sum(x => x.Quantity) descending
                     select new MedicineUsageInfo
                     {
-                        MedicineId = g.Key.MedicineId,
                         MedicineName = g.Key.MedicineName,
                         TotalQuantity = g.Sum(x => x.Quantity),
-                        OrdersCount = g.Count(),
-                        CategoryId = g.Key.CategoryId
+                        OrdersCount = g.Count()
                     };
 
         return query.Take(10).ToList();
@@ -126,13 +122,11 @@ public class PharmacyQueriesService
                     where componentIds == null || componentIds.Contains(component.ComponentId)
                     group new { CompQuantity = medicineComposition.Quantity, OrderQuantity = order.Quantity, UnitName = unit != null ? unit.UnitName : "Не указана" } by new 
                     { 
-                        component.ComponentId, 
                         component.ComponentName,
                         UnitName = unit != null ? unit.UnitName : "Не указана"
                     } into g
                     select new ComponentUsageInfo
                     {
-                        ComponentId = g.Key.ComponentId,
                         ComponentName = g.Key.ComponentName,
                         UnitName = g.Key.UnitName,
                         TotalQuantity = g.Sum(x => x.OrderQuantity * x.CompQuantity),
@@ -161,7 +155,6 @@ public class PharmacyQueriesService
                     where medicineTypeIds == null || medicineTypeIds.Contains(medicine.MedicineTypeId)
                     select new PatientOrderInfo
                     {
-                        PatientId = patient.PatientId,
                         FullName = $"{patient.LastName} {patient.FirstName} {patient.Patronymic}".Trim(),
                         Phone = patient.Phone,
                         MedicineName = medicine.MedicineName,
@@ -187,7 +180,6 @@ public class PharmacyQueriesService
                     orderby medicine.CurrentStock ascending
                     select new CriticalNormMedicineInfo
                     {
-                        MedicineId = medicine.MedicineId,
                         MedicineName = medicine.MedicineName,
                         MedicineTypeName = medicine.MedicineType.TypeName,
                         CurrentStock = medicine.CurrentStock ?? 0,
@@ -213,7 +205,6 @@ public class PharmacyQueriesService
                     orderby medicine.CurrentStock ascending
                     select new MinimumStockMedicineInfo
                     {
-                        MedicineId = medicine.MedicineId,
                         MedicineName = medicine.MedicineName,
                         CategoryName = medicine.Category != null ? medicine.Category.CategoryName : "Без категории",
                         CurrentStock = medicine.CurrentStock ?? 0,
@@ -240,7 +231,6 @@ public class PharmacyQueriesService
                     from pe in prodEmp.DefaultIfEmpty()
                     select new OrderInProductionInfo
                     {
-                        OrderId = order.OrderId,
                         OrderNumber = order.OrderNumber,
                         PatientName = $"{patient.LastName} {patient.FirstName} {patient.Patronymic}".Trim(),
                         MedicineName = medicine.MedicineName,
@@ -320,10 +310,8 @@ public class PharmacyQueriesService
                     from technology in techJoin.DefaultIfEmpty()
                     select new PreparationTechnologyInfo
                     {
-                        MedicineId = medicine.MedicineId,
                         MedicineName = medicine.MedicineName,
                         MedicineTypeName = medicine.MedicineType.TypeName,
-                        TechnologyId = technology != null ? technology.TechnologyId : (int?)null,
                         TechnologyCode = technology != null ? technology.TechnologyCode : "Не указана",
                         PreparationMethod = technology != null ? technology.PreparationMethod : medicine.Description ?? "Описание отсутствует",
                         PreparationTimeMinutes = technology != null ? technology.PreparationTimeMinutes : 0,
@@ -345,7 +333,6 @@ public class PharmacyQueriesService
             .Where(m => m.MedicineId == medicineId)
             .Select(m => new
             {
-                m.MedicineId,
                 m.MedicineName,
                 m.SalePrice,
                 m.ManufacturingCost,
@@ -373,7 +360,6 @@ public class PharmacyQueriesService
 
         return new MedicinePriceInfo
         {
-            MedicineId = medicine.MedicineId,
             MedicineName = medicine.MedicineName,
             SalePrice = medicine.SalePrice,
             ManufacturingCost = medicine.ManufacturingCost ?? 0,
@@ -402,7 +388,6 @@ public class PharmacyQueriesService
                     where medicineTypeId == null || medicine.MedicineTypeId == medicineTypeId
                     group order by new 
                     { 
-                        patient.PatientId, 
                         patient.LastName,
                         patient.FirstName,
                         patient.Patronymic,
@@ -411,7 +396,6 @@ public class PharmacyQueriesService
                     orderby g.Count() descending, g.Sum(x => x.TotalPrice) descending
                     select new ActiveCustomerInfo
                     {
-                        PatientId = g.Key.PatientId,
                         FullName = $"{g.Key.LastName} {g.Key.FirstName} {g.Key.Patronymic}".Trim(),
                         Phone = g.Key.Phone,
                         OrdersCount = g.Count(),
@@ -594,7 +578,6 @@ public class PharmacyQueriesService
 
 public class PatientInfo
 {
-    public int PatientId { get; set; }
     public string FullName { get; set; }
     public string Phone { get; set; }
     public string Address { get; set; }
@@ -606,7 +589,6 @@ public class PatientInfo
 
 public class PatientWaitingInfo
 {
-    public int PatientId { get; set; }
     public string FullName { get; set; }
     public string Phone { get; set; }
     public string Address { get; set; }
@@ -619,16 +601,13 @@ public class PatientWaitingInfo
 
 public class MedicineUsageInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public decimal TotalQuantity { get; set; }
     public int OrdersCount { get; set; }
-    public int? CategoryId { get; set; }
 }
 
 public class ComponentUsageInfo
 {
-    public int ComponentId { get; set; }
     public string ComponentName { get; set; }
     public string UnitName { get; set; }
     public decimal TotalQuantity { get; set; }
@@ -637,7 +616,6 @@ public class ComponentUsageInfo
 
 public class PatientOrderInfo
 {
-    public int PatientId { get; set; }
     public string FullName { get; set; }
     public string Phone { get; set; }
     public string MedicineName { get; set; }
@@ -649,7 +627,6 @@ public class PatientOrderInfo
 
 public class CriticalNormMedicineInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public string MedicineTypeName { get; set; }
     public decimal CurrentStock { get; set; }
@@ -661,7 +638,6 @@ public class CriticalNormMedicineInfo
 
 public class MinimumStockMedicineInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public string CategoryName { get; set; }
     public decimal CurrentStock { get; set; }
@@ -672,7 +648,6 @@ public class MinimumStockMedicineInfo
 
 public class OrderInProductionInfo
 {
-    public int OrderId { get; set; }
     public string OrderNumber { get; set; }
     public string PatientName { get; set; }
     public string MedicineName { get; set; }
@@ -698,10 +673,8 @@ public class RequiredComponentsInfo
 
 public class PreparationTechnologyInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public string MedicineTypeName { get; set; }
-    public int? TechnologyId { get; set; }
     public string TechnologyCode { get; set; }
     public string PreparationMethod { get; set; }
     public int PreparationTimeMinutes { get; set; }
@@ -719,7 +692,6 @@ public class ComponentPriceInfo
 
 public class MedicinePriceInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public decimal SalePrice { get; set; }
     public decimal ManufacturingCost { get; set; }
@@ -731,7 +703,6 @@ public class MedicinePriceInfo
 
 public class ActiveCustomerInfo
 {
-    public int PatientId { get; set; }
     public string FullName { get; set; }
     public string Phone { get; set; }
     public int OrdersCount { get; set; }
@@ -750,7 +721,6 @@ public class MedicineComponentInfo
 
 public class DetailedMedicineInfo
 {
-    public int MedicineId { get; set; }
     public string MedicineName { get; set; }
     public string MedicineTypeName { get; set; }
     public string CategoryName { get; set; }
@@ -770,7 +740,6 @@ public class DetailedMedicineInfo
 public class ExpiredMedicineInfo
 {
     public string ItemType { get; set; }
-    public int ItemId { get; set; }
     public DateOnly? ExpirationDate { get; set; }
     public decimal ExpectedQuantity { get; set; }
     public decimal ActualQuantity { get; set; }
@@ -781,7 +750,6 @@ public class ExpiredMedicineInfo
 public class ShortageInfo
 {
     public string ItemType { get; set; }
-    public int ItemId { get; set; }
     public decimal ExpectedQuantity { get; set; }
     public decimal ActualQuantity { get; set; }
     public decimal ShortageAmount { get; set; }
@@ -792,7 +760,6 @@ public class ShortageInfo
 
 public class PrescriptionInfo
 {
-    public int PrescriptionId { get; set; }
     public string PrescriptionNumber { get; set; }
     public string PatientName { get; set; }
     public string DoctorName { get; set; }
