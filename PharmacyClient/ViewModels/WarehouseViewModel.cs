@@ -197,73 +197,69 @@ namespace PharmacyClient.ViewModels
         }
 
         [RelayCommand]
-        private void AddMovement()
+        private async Task AddAsync()
         {
             try
             {
-                var newMovement = new StockMovement
+                // В зависимости от активной вкладки добавляем движение или инвентаризацию
+                if (ActiveTab == 0)
                 {
-                    MovementDate = DateTime.Now,
-                    DocumentNumber = $"DOC-{DateTime.Now:yyyyMMddHHmmss}",
-                    MovementType = "Приход",
-                    ItemType = "Medicine",
-                    ItemId = 0,
-                    Quantity = 1,
-                    UnitId = EmployeesList.Count > 0 ? 1 : 0,
-                    PreviousStock = 0,
-                    NewStock = 1,
-                    PerformedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
-                    Reason = "Новое движение",
-                    CreatedDate = DateTime.Now
-                };
+                    // Добавляем движение
+                    var newMovement = new StockMovement
+                    {
+                        MovementDate = DateTime.Now,
+                        DocumentNumber = $"DOC-{DateTime.Now:yyyyMMddHHmmss}",
+                        MovementType = "Приход",
+                        ItemType = "Medicine",
+                        ItemId = 0,
+                        Quantity = 1,
+                        UnitId = EmployeesList.Count > 0 ? 1 : 0,
+                        PreviousStock = 0,
+                        NewStock = 1,
+                        PerformedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
+                        Reason = "Новое движение",
+                        CreatedDate = DateTime.Now
+                    };
 
-                _context.StockMovements.Add(newMovement);
-                _context.SaveChanges();
+                    _context.StockMovements.Add(newMovement);
+                    await _context.SaveChangesAsync();
 
-                StockMovements.Insert(0, newMovement);
-                MovementsCount = StockMovements.Count;
-                StatusMessage = "Движение товара успешно добавлено";
+                    StockMovements.Insert(0, newMovement);
+                    MovementsCount = StockMovements.Count;
+                    StatusMessage = "Движение товара успешно добавлено";
+                }
+                else if (ActiveTab == 1)
+                {
+                    // Добавляем инвентаризацию
+                    var newInventory = new InventoryCheck
+                    {
+                        InventoryNumber = $"INV-{DateTime.Now:yyyyMMddHHmmss}",
+                        CheckDate = DateTime.Now,
+                        Status = "В процессе",
+                        ConductedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
+                        TotalItemsChecked = 0,
+                        DiscrepanciesFound = 0,
+                        ExpiredItemsCount = 0,
+                        CriticalNormViolations = 0,
+                        ShortageValue = 0,
+                        SurplusValue = 0,
+                        ReportGenerated = false,
+                        CreatedDate = DateTime.Now,
+                        ModifiedDate = DateTime.Now
+                    };
+
+                    _context.InventoryChecks.Add(newInventory);
+                    await _context.SaveChangesAsync();
+
+                    InventoryChecks.Insert(0, newInventory);
+                    InventoriesCount = InventoryChecks.Count;
+                    StatusMessage = "Инвентаризация успешно создана";
+                }
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Ошибка добавления движения: {ex.Message}";
-                MessageBox.Show($"Ошибка добавления движения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        [RelayCommand]
-        private void AddInventory()
-        {
-            try
-            {
-                var newInventory = new InventoryCheck
-                {
-                    InventoryNumber = $"INV-{DateTime.Now:yyyyMMddHHmmss}",
-                    CheckDate = DateTime.Now,
-                    Status = "В процессе",
-                    ConductedByEmployeeId = EmployeesList.FirstOrDefault()?.EmployeeId ?? 0,
-                    TotalItemsChecked = 0,
-                    DiscrepanciesFound = 0,
-                    ExpiredItemsCount = 0,
-                    CriticalNormViolations = 0,
-                    ShortageValue = 0,
-                    SurplusValue = 0,
-                    ReportGenerated = false,
-                    CreatedDate = DateTime.Now,
-                    ModifiedDate = DateTime.Now
-                };
-
-                _context.InventoryChecks.Add(newInventory);
-                _context.SaveChanges();
-
-                InventoryChecks.Insert(0, newInventory);
-                InventoriesCount = InventoryChecks.Count;
-                StatusMessage = "Инвентаризация успешно создана";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Ошибка создания инвентаризации: {ex.Message}";
-                MessageBox.Show($"Ошибка создания инвентаризации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusMessage = $"Ошибка добавления: {ex.Message}";
+                MessageBox.Show($"Ошибка добавления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
