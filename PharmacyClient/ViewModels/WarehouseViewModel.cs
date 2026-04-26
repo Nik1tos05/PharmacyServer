@@ -71,9 +71,14 @@ namespace PharmacyClient.ViewModels
         public WarehouseViewModel()
         {
             _context = new PharmacyDbContext();
-            LoadEmployeesAsync().ConfigureAwait(false);
-            LoadMovementsAsync().ConfigureAwait(false);
-            LoadInventoriesAsync().ConfigureAwait(false);
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await LoadEmployeesAsync();
+            await LoadMovementsAsync();
+            await LoadInventoriesAsync();
         }
 
         private async Task LoadEmployeesAsync()
