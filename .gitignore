@@ -1,34 +1,55 @@
 ```
-# Build artifacts
-bin/
-obj/
+# Compiled and build artifacts
 *.exe
 *.dll
-*.pdb
-*.userprefs
-*.cache
-*.log
+*.so
+*.o
+*.obj
+*.out
+*.class
+*.pyc
+__pycache__/
 
 # Dependencies
-packages/
+node_modules/
+venv/
+.venv/
+.env
+.env.local
+*.env.*
 
-# User-specific files
-*.user
-*.userosscache
-*.suo
-*.userprefs
+# Build directories
+dist/
+build/
+target/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
 
-# Environment specific settings
-.appveyor.yml
-.circleci/config.yml
-.azure-pipelines.yml
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Package management
+.gradle/
+.npm/
+.yarn/
+bower_components/
 
 # OS generated files
-.DS_Store
+*.bak
+*~
 .DS_Store?
-._*
-.Spotlight-V100
-.Trashes
 ehthumbs.db
-Thumbs.db
+Icon?
 ```
