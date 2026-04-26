@@ -34,13 +34,10 @@ namespace PharmacyClient.Views
         {
             if (e.Row.Item is Medicine editedMedicine && editedMedicine.MedicineId > 0)
             {
-                // Валидация: название не должно быть пустым
+                // Валидация: если название пустое, заменяем на "Новое лекарство"
                 if (string.IsNullOrWhiteSpace(editedMedicine.MedicineName))
                 {
-                    MessageBox.Show("Название лекарства не может быть пустым!", "Ошибка валидации", 
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    e.Cancel = true;
-                    return;
+                    editedMedicine.MedicineName = "Новое лекарство";
                 }
 
                 try
