@@ -254,8 +254,8 @@ namespace PharmacyClient.ViewModels
                     command.CommandText = @"SELECT COUNT(*) FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')";
                     command.CommandType = System.Data.CommandType.Text;
                     
-                    var result = await command.ExecuteScalarAsync();
-                    procedureExists = Convert.ToInt32(result);
+                    var procedureResult = await command.ExecuteScalarAsync();
+                    procedureExists = Convert.ToInt32(procedureResult);
                 }
                 
                 if (procedureExists > 0)
