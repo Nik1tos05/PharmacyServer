@@ -243,10 +243,20 @@ namespace PharmacyClient.ViewModels
             {
                 await using var context = new PharmacyDbContext();
                 
-                // Проверяем существование хранимой процедуры
-                var procedureExists = await context.Database.SqlQueryRaw<int>(
-                    "SELECT COUNT(*) AS CountResult FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')")
-                    .FirstOrDefaultAsync();
+                // Проверяем существование хранимой процедуры более надежным способом
+                // Используем ADO.NET напрямую для избежания проблем с маппингом
+                var procedureExists = 0;
+                await using (var command = context.Database.GetDbConnection().CreateCommand())
+                {
+                    if (context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+                        await context.Database.GetDbConnection().OpenAsync();
+                    
+                    command.CommandText = @"SELECT COUNT(*) FROM sys.procedures WHERE name = 'sp_DeleteMedicine' AND schema_id = SCHEMA_ID('dbo')";
+                    command.CommandType = System.Data.CommandType.Text;
+                    
+                    var result = await command.ExecuteScalarAsync();
+                    procedureExists = Convert.ToInt32(result);
+                }
                 
                 if (procedureExists > 0)
                 {

@@ -1,49 +1,67 @@
-*.swp
-*.*~
-project.lock.json
-.DS_Store
+```
+# Compiled and build artifacts
 *.pyc
-nupkg/
+__pycache__/
+*.o
+*.obj
+*.dll
+*.so
+*.exe
+*.class
+*.out
+*.a
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-
-# Rider
-.idea/
-
-# Visual Studio
-.vs/
-
-# Fleet
-.fleet/
-
-# Code Rush
-.cr/
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-build/
-bld/
-[Bb]in/
-[Oo]bj/
-[Oo]ut/
-msbuild.log
-msbuild.err
-msbuild.wrn
-
-# Node.js build artifacts
+# Dependencies
 node_modules/
-package-lock.json
-package.json
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Build directories
+dist/
+build/
+target/
+coverage/
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.gradle/
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
